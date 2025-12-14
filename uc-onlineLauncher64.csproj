@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>uc-onlineLauncher64</AssemblyName>
+    <OutputPath>uc\bin\$(Configuration)\x64\</OutputPath>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="uc-online64.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Program64.cs" />
+  </ItemGroup>
+</Project>
