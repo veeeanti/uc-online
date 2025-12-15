@@ -1,0 +1,1 @@
+# The only two things I ask of anyone who wants to use this code is that you leave the name the same (unless I allow otherwise) and do not add malware. with that being said, go nuts. make this better than what I can make of it. 
