@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>uc_onlineLauncher_crossplatform</AssemblyName>
+    <OutputPath>bin/$(Configuration)/</OutputPath>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!-- Cross-platform settings -->
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <SelfContained>false</SelfContained>
+    <!-- Allow platform-specific code -->
+    <RuntimeIdentifiers>linux-x64;win-x64;win-x86;osx-x64</RuntimeIdentifiers>
+    <!-- Startup object for the crossplatform launcher -->
+    <StartupObject>uc_onlineLauncher.Program_crossplatform</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="uc_online_crossplatform.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Program_crossplatform.cs" />
+  </ItemGroup>
+
+  <!-- Platform-specific publish settings -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+    <RuntimeHostConfigurationOption Include="Switch.System.IO.UseLegacyPathHandling" Value="false" />
+  </ItemGroup>
+
+</Project>
