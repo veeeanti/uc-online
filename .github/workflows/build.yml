@@ -43,10 +43,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: uc-online-launcher-x86
-        path: build-x86/Release/uc-online-launcher.exe
+        path: build-x86/Release/uc-online.exe
 
     - name: Upload x64 artifacts
       uses: actions/upload-artifact@v4
       with:
         name: uc-online-launcher-x64
-        path: build-x64/Release/uc-online-launcher64.exe
+        path: build-x64/Release/uc-online64.exe
