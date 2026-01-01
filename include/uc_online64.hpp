@@ -4,7 +4,12 @@
 #include "logger.hpp"
 #include <string>
 #include <memory>
+
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 class UCOnline64 {
 public:
@@ -67,5 +72,5 @@ private:
     SteamApps_t SteamApps = nullptr;
     GetHSteamPipe_t GetHSteamPipe = nullptr;
 
-    HMODULE _steamApiModule = nullptr;
+    void* _steamApiModule = nullptr;
 };

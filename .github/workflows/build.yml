@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
 
     steps:
@@ -50,3 +50,37 @@ jobs:
       with:
         name: uc-online-launcher-x64
         path: build-x64/Release/uc-online64.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+
+    - name: Build
+      run: |
+        cd build
+        make
+
+    - name: Upload 32-bit artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: uc-online-launcher-linux-x86
+        path: build/uc-online
+
+    - name: Upload 64-bit artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: uc-online-launcher-linux-x64
+        path: build/uc-online64

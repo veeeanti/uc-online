@@ -8,17 +8,31 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include)
 
 # 32-bit version
-add_executable(uc-online src/main.cpp src/uc_online.cpp src/ini_config.cpp src/logger.cpp src/resources.rc)
+if(WIN32)
+    add_executable(uc-online src/main.cpp src/uc_online.cpp src/ini_config.cpp src/logger.cpp src/resources.rc)
+else()
+    add_executable(uc-online src/main.cpp src/uc_online.cpp src/ini_config.cpp src/logger.cpp)
+endif()
 
-# For Windows, link kernel32 for LoadLibrary, etc.
+# Link libraries
 if(WIN32)
     target_link_libraries(uc-online PRIVATE kernel32)
+else()
+    target_link_libraries(uc-online PRIVATE dl)
 endif()
 
 # 64-bit version
-add_executable(uc-online64 src/main64.cpp src/uc_online64.cpp src/ini_config.cpp src/logger.cpp src/resources.rc)
+if(WIN32)
+    add_executable(uc-online64 src/main64.cpp src/uc_online64.cpp src/ini_config.cpp src/logger.cpp src/resources.rc)
+else()
+    add_executable(uc-online64 src/main64.cpp src/uc_online64.cpp src/ini_config.cpp src/logger.cpp)
+endif()
+
 if(WIN32)
     target_link_libraries(uc-online64 PRIVATE kernel32)
+    target_compile_definitions(uc-online64 PRIVATE IS_64BIT)
+else()
+    target_link_libraries(uc-online64 PRIVATE dl)
     target_compile_definitions(uc-online64 PRIVATE IS_64BIT)
 endif()
 

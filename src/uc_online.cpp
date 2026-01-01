@@ -4,6 +4,15 @@
 #include <filesystem>
 #include <thread>
 #include <chrono>
+#include <sstream>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <spawn.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#endif
 
 UCOnline::UCOnline(const std::string& iniFilePath) {
     _config = std::make_unique<IniConfig>(iniFilePath);
@@ -120,14 +129,22 @@ void UCOnline::CreateAppIdFile() {
 
 void UCOnline::LoadSteamApiDll() {
     try {
+#ifdef _WIN32
 #ifdef _WIN64
         std::string dllName = "steam_api64.dll";
 #else
         std::string dllName = "steam_api.dll";
 #endif
+#else
+#ifdef __x86_64__
+        std::string dllName = "libsteam_api64.so";
+#else
+        std::string dllName = "libsteam_api.so";
+#endif
+#endif
 
         _logger->Log(std::string("Current process is ") +
-#ifdef _WIN64
+#ifdef __x86_64__
             std::string("64-bit")
 #else
             std::string("32-bit")
@@ -135,21 +152,34 @@ void UCOnline::LoadSteamApiDll() {
             + std::string(", looking for ") + dllName);
 
         if (_steamApiDllPath.empty()) {
-            _logger->Log("No custom steam_api.dll path configured, using default path: same directory as this is running from.");
+            _logger->Log("No custom steam_api library path configured, using default path: same directory as this is running from.");
             // Load default
+#ifdef _WIN32
             _steamApiModule = LoadLibraryA(dllName.c_str());
+#else
+            _steamApiModule = dlopen(dllName.c_str(), RTLD_LAZY);
+#endif
         } else {
             std::filesystem::path dllPath = std::filesystem::path(_steamApiDllPath) / dllName;
             if (std::filesystem::exists(dllPath)) {
                 _logger->Log("Found " + dllName + " at: " + dllPath.string());
+#ifdef _WIN32
                 _steamApiModule = LoadLibraryA(dllPath.string().c_str());
+#else
+                _steamApiModule = dlopen(dllPath.string().c_str(), RTLD_LAZY);
+#endif
                 if (_steamApiModule) {
                     _logger->Log("Successfully loaded " + dllName + " from set path");
                 } else {
                     _logger->LogWarning("Failed to load " + dllName + " from set path, likely wasn't written correctly, so it's falling back to the default path - next to this / in the same directory.");
+#ifdef _WIN32
                     _steamApiModule = LoadLibraryA(dllName.c_str());
+#else
+                    _steamApiModule = dlopen(dllName.c_str(), RTLD_LAZY);
+#endif
                 }
             } else {
+#ifdef _WIN32
 #ifdef _WIN64
                 std::filesystem::path win64Path = std::filesystem::path(_steamApiDllPath) / "win64" / dllName;
                 if (std::filesystem::exists(win64Path)) {
@@ -163,13 +193,19 @@ void UCOnline::LoadSteamApiDll() {
                     }
                 }
 #endif
+#endif
                 _logger->LogWarning(dllName + " not found at configured path, using default loading");
+#ifdef _WIN32
                 _steamApiModule = LoadLibraryA(dllName.c_str());
+#else
+                _steamApiModule = dlopen(dllName.c_str(), RTLD_LAZY);
+#endif
             }
         }
 
     load_functions:
         if (_steamApiModule) {
+#ifdef _WIN32
             SteamAPI_Init = (SteamAPI_Init_t)GetProcAddress(_steamApiModule, "SteamAPI_Init");
             SteamAPI_InitFlat = (SteamAPI_InitFlat_t)GetProcAddress(_steamApiModule, "SteamAPI_InitFlat");
             SteamAPI_Shutdown = (SteamAPI_Shutdown_t)GetProcAddress(_steamApiModule, "SteamAPI_Shutdown");
@@ -178,12 +214,22 @@ void UCOnline::LoadSteamApiDll() {
             SteamClient = (SteamClient_t)GetProcAddress(_steamApiModule, "SteamClient");
             SteamApps = (SteamApps_t)GetProcAddress(_steamApiModule, "SteamApps");
             GetHSteamPipe = (GetHSteamPipe_t)GetProcAddress(_steamApiModule, "GetHSteamPipe");
+#else
+            SteamAPI_Init = (SteamAPI_Init_t)dlsym(_steamApiModule, "SteamAPI_Init");
+            SteamAPI_InitFlat = (SteamAPI_InitFlat_t)dlsym(_steamApiModule, "SteamAPI_InitFlat");
+            SteamAPI_Shutdown = (SteamAPI_Shutdown_t)dlsym(_steamApiModule, "SteamAPI_Shutdown");
+            SteamAPI_RunCallbacks = (SteamAPI_RunCallbacks_t)dlsym(_steamApiModule, "SteamAPI_RunCallbacks");
+            SteamAPI_RestartAppIfNecessary = (SteamAPI_RestartAppIfNecessary_t)dlsym(_steamApiModule, "SteamAPI_RestartAppIfNecessary");
+            SteamClient = (SteamClient_t)dlsym(_steamApiModule, "SteamClient");
+            SteamApps = (SteamApps_t)dlsym(_steamApiModule, "SteamApps");
+            GetHSteamPipe = (GetHSteamPipe_t)dlsym(_steamApiModule, "GetHSteamPipe");
+#endif
         } else {
-            _logger->LogError("Failed to load steam_api.dll");
+            _logger->LogError("Failed to load steam_api library");
         }
     } catch (const std::exception& ex) {
-        _logger->LogException(ex, "Error loading steam_api.dll");
-        std::cout << "Error loading steam_api.dll: " << ex.what() << std::endl;
+        _logger->LogException(ex, "Error loading steam_api library");
+        std::cout << "Error loading steam_api library: " << ex.what() << std::endl;
     }
 }
 
@@ -278,6 +324,7 @@ bool UCOnline::LaunchGame() {
         std::filesystem::path exePath(_gameExecutable);
         std::string workingDir = exePath.parent_path().string();
 
+#ifdef _WIN32
         STARTUPINFOA si = { sizeof(si) };
         PROCESS_INFORMATION pi;
 
@@ -294,6 +341,39 @@ bool UCOnline::LaunchGame() {
             std::cout << "Failed to launch game process" << std::endl;
             return false;
         }
+#else
+        pid_t pid;
+        char* argv[256]; // Assuming max 256 args
+        int argc = 0;
+        std::string argStr = _gameExecutable + " " + _gameArguments;
+        // Simple parsing, assuming no quotes for now
+        std::istringstream iss(argStr);
+        std::string token;
+        while (iss >> token && argc < 255) {
+            argv[argc++] = strdup(token.c_str());
+        }
+        argv[argc] = nullptr;
+
+        posix_spawnattr_t attr;
+        posix_spawnattr_init(&attr);
+        posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETPGROUP);
+
+        if (posix_spawn(&pid, _gameExecutable.c_str(), nullptr, &attr, argv, environ) == 0) {
+            _logger->Log("Game launched successfully! (PID: " + std::to_string(pid) + ")");
+            std::cout << "Game launched successfully! The game's window should appear shortly. This window can be closed and / or may close on its own." << std::endl;
+            // Free allocated strings
+            for (int i = 0; i < argc; ++i) free(argv[i]);
+            posix_spawnattr_destroy(&attr);
+            return true;
+        } else {
+            _logger->LogError("Failed to launch game process");
+            std::cout << "Failed to launch game process" << std::endl;
+            // Free allocated strings
+            for (int i = 0; i < argc; ++i) free(argv[i]);
+            posix_spawnattr_destroy(&attr);
+            return false;
+        }
+#endif
     } catch (const std::exception& ex) {
         _logger->LogException(ex, "Game launch failed");
         _logger->Log("This can happen for many reasons, if you're certain it should work then just try whatever you can. Throw whatever you got at the wall and see what sticks.");
