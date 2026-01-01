@@ -133,11 +133,9 @@ GameArguments =
 # Set the path to the steam_appid.txt file to use. (If one does not exist, it will be generated with the appID set at the top.)
 SteamAppIdFile = steam_appid.txt
 
-# Path to steam_api.dll (leave empty to use default location - in the same folder next to the launcher.)
-# Only set the path as the folder containing the dll relative to the launcher.
-# Again, using UE5 games as an example:
-# game folder\Engine\Binaries\ThirdParty\Steamworks\Steamv153\Win64
-SteamApiDLLPath = 
+# Path to libsteam_api.so (leave empty to use default location - in the same folder next to the launcher.)
+# Only set the path as the folder containing the library relative to the launcher.
+SteamApiDLLPath =
 
 [Logging]
 # Turns on logging. Not much gets logged, so it's not exactly useful. I recommend keeping it set to false, however with it being rewritten, it seems to behave differently.
