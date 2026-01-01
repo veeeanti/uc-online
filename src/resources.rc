@@ -23,7 +23,7 @@ BEGIN
             VALUE "FileDescription",  "uc-online Launcher"
             VALUE "FileVersion",      "1.0.0.0"
             VALUE "InternalName",     "uc-online"
-            VALUE "LegalCopyright",   "veeλnti / union-crax.xyz | 2026"
+            VALUE "LegalCopyright",   "veeanti / union-crax.xyz | 2026"
 #ifdef IS_64BIT
             VALUE "OriginalFilename", "uc-online64.exe"
 #else
