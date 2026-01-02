@@ -90,7 +90,11 @@ std::string Logger::GetCurrentTimeString() const {
     auto now = std::chrono::system_clock::now();
     auto time_t = std::chrono::system_clock::to_time_t(now);
     std::tm tm;
+#if defined(_WIN32) || defined(_WIN64)
     localtime_s(&tm, &time_t);
+#else
+    localtime_r(&time_t, &tm);
+#endif
     std::stringstream ss;
     ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
     return ss.str();
