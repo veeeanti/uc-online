@@ -45,26 +45,20 @@ bool UCOnline64::InitializeUCOnline() {
 
         LoadSteamApi64Dll();
 
-        if (!InitializeSteamInterfaces()) {
-            std::cout << "Failed to initialize Steam interfaces" << std::endl;
-            return false;
-        }
-
-        char errorMsg[1024] = {0};
-        bool result = SteamAPI_Init ? SteamAPI_Init(errorMsg) : false;
+        bool result = TryMultipleInitializationMethods();
 
         if (!result) {
-            std::cout << "SteamAPI_Init failed: " << errorMsg << std::endl;
-
-            if (SteamAPI_RestartAppIfNecessary && SteamAPI_RestartAppIfNecessary(_currentAppID)) {
-                return false;
-            }
-
             return false;
         }
 
         _steamInitialized = true;
         _logger->Log("Steam initialized successfully");
+
+        if (InitializeSteamInterfaces()) {
+            _logger->Log("Steam interfaces accessible");
+        } else {
+            _logger->LogWarning("Steam interfaces not accessible");
+        }
 
         return true;
     } catch (const std::exception& ex) {
@@ -176,8 +170,38 @@ void UCOnline64::LoadSteamApi64Dll() {
 }
 
 bool UCOnline64::TryMultipleInitializationMethods() {
-    // Simplified for 64-bit
-    return InitializeUCOnline(); // Already handled in InitializeUCOnline
+    if (!SteamAPI_Init) return false;
+
+    char errorMsg[1024] = {0};
+    bool result = SteamAPI_Init(errorMsg);
+
+    if (result) {
+        _logger->Log("SteamAPI_Init succeeded");
+        return true;
+    } else {
+        _logger->Log("SteamAPI_Init failed: " + std::string(errorMsg));
+
+        if (SteamAPI_InitFlat) {
+            char errorMsgFlat[1024] = {0};
+            bool resultFlat = SteamAPI_InitFlat(errorMsgFlat);
+
+            if (resultFlat) {
+                _logger->Log("SteamAPI_InitFlat succeeded");
+                return true;
+            } else {
+                _logger->Log("SteamAPI_InitFlat failed: " + std::string(errorMsgFlat));
+
+                if (SteamAPI_RestartAppIfNecessary && SteamAPI_RestartAppIfNecessary(_currentAppID)) {
+                    _logger->Log("Steam requested app restart");
+                    return false;
+                }
+
+                return false;
+            }
+        }
+    }
+
+    return false;
 }
 
 bool UCOnline64::InitializeSteamInterfaces() {
