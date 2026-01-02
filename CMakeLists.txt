@@ -12,6 +12,7 @@ include_directories(sdk/public)
 
 # 32-bit version
 add_executable(uc-online src/main.cpp src/uc_online.cpp src/ini_config.cpp src/logger.cpp)
+set_target_properties(uc-online PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
 
 # Link libraries
 target_link_libraries(uc-online PRIVATE dl ${CMAKE_SOURCE_DIR}/sdk/redistributable_bin/linux32/libsteam_api.so)
