@@ -9,17 +9,18 @@ set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 # Include directories
 include_directories(include)
+include_directories(sdk/public)
 
 # 32-bit version
 add_executable(uc-online src/main.cpp src/uc_online.cpp src/ini_config.cpp src/logger.cpp)
 
 # Link libraries
-target_link_libraries(uc-online PRIVATE dl)
+target_link_libraries(uc-online PRIVATE dl ${CMAKE_SOURCE_DIR}/sdk/redistributable_bin/linux64/libsteam_api.so)
 
 # 64-bit version
 add_executable(uc-online64 src/main64.cpp src/uc_online64.cpp src/ini_config.cpp src/logger.cpp)
 
-target_link_libraries(uc-online64 PRIVATE dl)
+target_link_libraries(uc-online64 PRIVATE dl ${CMAKE_SOURCE_DIR}/sdk/redistributable_bin/linux64/libsteam_api.so)
 target_compile_definitions(uc-online64 PRIVATE IS_64BIT)
 
 # Copy config.ini if it exists
