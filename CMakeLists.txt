@@ -15,7 +15,7 @@ include_directories(sdk/public)
 add_executable(uc-online src/main.cpp src/uc_online.cpp src/ini_config.cpp src/logger.cpp)
 
 # Link libraries
-target_link_libraries(uc-online PRIVATE dl ${CMAKE_SOURCE_DIR}/sdk/redistributable_bin/linux64/libsteam_api.so)
+target_link_libraries(uc-online PRIVATE dl ${CMAKE_SOURCE_DIR}/sdk/redistributable_bin/linux32/libsteam_api.so)
 
 # 64-bit version
 add_executable(uc-online64 src/main64.cpp src/uc_online64.cpp src/ini_config.cpp src/logger.cpp)
