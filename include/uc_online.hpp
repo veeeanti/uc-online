@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 #include <windows.h>
-#include <steam_api.h>
+#include <steam/steam_api.h>
 
 class UCOnline {
 public:
