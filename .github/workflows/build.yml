@@ -2,7 +2,7 @@ name: Build C++ Version
 
 on:
   push:
-    branches: [ windows-c++ ]
+    branches: [ main ]
 
 jobs:
   build:
