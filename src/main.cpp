@@ -4,8 +4,8 @@
 #include <chrono>
 
 int main() {
-    std::cout << "uc-online Launcher 32-bit" << std::endl;
-    std::cout << "=========================" << std::endl << std::endl;
+    std::cout << "uc-online Launcher for Linux" << std::endl;
+    std::cout << "============================" << std::endl << std::endl;
 
     UCOnline uc_online;
 
@@ -33,8 +33,8 @@ int main() {
         if (!uc_online.GetGameExecutable().empty()) {
             std::cout << "Attempting to launch game using set game executable in config..." << std::endl;
             if (uc_online.LaunchGame()) {
-                std::cout << "Game launched! Press any key to close this window." << std::endl;
-                std::cin.get();
+                std::cout << "Game launched! Press Enter to exit." << std::endl;
+                std::cin.ignore();
                 return 0;
             }
         } else {
@@ -49,7 +49,7 @@ int main() {
                 uc_online.RunSteamCallbacks();
             }
             std::this_thread::sleep_for(std::chrono::seconds(1));
-            std::cout << "Trying to run the game... This usually means it won't run even after successfully initializing Steam using a spoofed appid. Double check your config, especially the gameexecutable line." << std::endl; 
+            std::cout << "Trying to run the game... This usually means it won't run even after successfully initializing Steam using a spoofed appid. Double check your config, especially the gameexecutable line." << std::endl;
             std::cout << "(" << (i + 1) << "/5 seconds until this window automatically closes unless game launch succeeds.)" << std::endl;
         }
 

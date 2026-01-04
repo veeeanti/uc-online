@@ -6,10 +6,13 @@
 #include <chrono>
 #include <sstream>
 #include <cstring>
+#include <vector>
+#include <algorithm>
 
 #include <spawn.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <signal.h>
 
 UCOnline::UCOnline(const std::string& iniFilePath) {
     _config = std::make_unique<IniConfig>(iniFilePath);
@@ -152,9 +155,105 @@ bool UCOnline::InitializeSteamInterfaces() {
             _logger->Log("Successfully obtained SteamUser interface");
         }
 
+        // Initialize all Steam interfaces
+        if (!InitializeSteamGameServer()) {
+            _logger->LogWarning("Failed to initialize Steam GameServer interface");
+        }
+
+        if (!InitializeSteamUGC()) {
+            _logger->LogWarning("Failed to initialize Steam UGC interface");
+        }
+
+        if (!InitializeSteamHTTP()) {
+            _logger->LogWarning("Failed to initialize Steam HTTP interface");
+        }
+
+        if (!InitializeSteamNetworking()) {
+            _logger->LogWarning("Failed to initialize Steam Networking interface");
+        }
+
+        if (!InitializeSteamClient()) {
+            _logger->LogWarning("Failed to initialize Steam Client interface");
+        }
+
         return true;
     } catch (const std::exception& ex) {
         _logger->LogException(ex, "Error initializing Steam interfaces");
+        return false;
+    }
+}
+
+bool UCOnline::InitializeSteamGameServer() {
+    try {
+        _steamGameServer = SteamGameServer();
+        if (!_steamGameServer) {
+            _logger->LogError("SteamGameServer interface not available");
+            return false;
+        }
+        _logger->Log("Successfully obtained SteamGameServer interface");
+        return true;
+    } catch (const std::exception& ex) {
+        _logger->LogException(ex, "Error initializing Steam GameServer interface");
+        return false;
+    }
+}
+
+bool UCOnline::InitializeSteamUGC() {
+    try {
+        _steamUGC = SteamUGC();
+        if (!_steamUGC) {
+            _logger->LogError("SteamUGC interface not available");
+            return false;
+        }
+        _logger->Log("Successfully obtained SteamUGC interface");
+        return true;
+    } catch (const std::exception& ex) {
+        _logger->LogException(ex, "Error initializing Steam UGC interface");
+        return false;
+    }
+}
+
+bool UCOnline::InitializeSteamHTTP() {
+    try {
+        _steamHTTP = SteamHTTP();
+        if (!_steamHTTP) {
+            _logger->LogError("SteamHTTP interface not available");
+            return false;
+        }
+        _logger->Log("Successfully obtained SteamHTTP interface");
+        return true;
+    } catch (const std::exception& ex) {
+        _logger->LogException(ex, "Error initializing Steam HTTP interface");
+        return false;
+    }
+}
+
+bool UCOnline::InitializeSteamNetworking() {
+    try {
+        _steamNetworking = SteamNetworking();
+        if (!_steamNetworking) {
+            _logger->LogError("SteamNetworking interface not available");
+            return false;
+        }
+        _logger->Log("Successfully obtained SteamNetworking interface");
+        return true;
+    } catch (const std::exception& ex) {
+        _logger->LogException(ex, "Error initializing Steam Networking interface");
+        return false;
+    }
+}
+
+bool UCOnline::InitializeSteamClient() {
+    try {
+        _steamClient = SteamClient();
+        if (!_steamClient) {
+            _logger->LogError("SteamClient interface not available");
+            return false;
+        }
+        _logger->Log("Successfully obtained SteamClient interface");
+        return true;
+    } catch (const std::exception& ex) {
+        _logger->LogException(ex, "Error initializing Steam Client interface");
         return false;
     }
 }

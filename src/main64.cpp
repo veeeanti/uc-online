@@ -4,8 +4,8 @@
 #include <chrono>
 
 int main() {
-    std::cout << "uc-online Launcher 64-bit" << std::endl;
-    std::cout << "=========================" << std::endl << std::endl;
+    std::cout << "uc-online64 Launcher for Linux" << std::endl;
+    std::cout << "==============================" << std::endl << std::endl;
 
     UCOnline64 uc_online;
 
