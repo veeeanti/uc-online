@@ -1,4 +1,4 @@
-name: Build C++ Version
+name: Build C++ Version for linux
 
 on:
   push:
