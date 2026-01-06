@@ -2,9 +2,10 @@ name: Build C++ Version
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, linux-c++ ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, linux-c++ ]
+  workflow_dispatch:
 
 jobs:
   build:
