@@ -2,9 +2,10 @@ name: Build C++ Version
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, linux, main-nosteamworks ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, linux ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,37 +17,32 @@ jobs:
     - name: Install CMake
       run: |
         choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-
     - name: Configure CMake for x86
       run: |
         mkdir build-x86
         cd build-x86
         cmake .. -G "Visual Studio 17 2022" -A Win32
-
     - name: Build x86
       run: |
         cd build-x86
         cmake --build . --config Release
-
     - name: Configure CMake for x64
       run: |
         mkdir build-x64
         cd build-x64
         cmake .. -G "Visual Studio 17 2022" -A x64
-
     - name: Build x64
       run: |
         cd build-x64
         cmake --build . --config Release
-
     - name: Upload x86 artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: uc-online-launcher-x86
+        name: uc-online-x86
         path: build-x86/Release/uc-online.exe
 
     - name: Upload x64 artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: uc-online-launcher-x64
+        name: uc-online-x64
         path: build-x64/Release/uc-online64.exe
