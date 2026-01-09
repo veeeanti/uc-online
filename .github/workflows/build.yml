@@ -2,7 +2,7 @@ name: Build C++ Version
 
 on:
   push:
-    branches: [ main, linux ]
+    branches: [ main, linux, main-nosteamworks ]
   pull_request:
     branches: [ main, linux ]
   workflow_dispatch:
