@@ -17,14 +17,14 @@ include_directories(include)
 # 32-bit version
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
     add_executable(uc-online src/main.cpp src/uc_online.cpp src/ini_config.cpp src/logger.cpp src/steam_api_interfaces.cpp src/resources.rc)
-    target_link_libraries(uc-online PRIVATE kernel32 /DELAYLOAD:$(CMAKE_SOURCE_DIR)/steam_api.dll)
+    target_link_libraries(uc-online PRIVATE kernel32)
     target_compile_definitions(uc-online PRIVATE IS_32BIT)
 endif()
 
 # 64-bit version
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     add_executable(uc-online64 src/main64.cpp src/uc_online64.cpp src/ini_config.cpp src/logger.cpp src/steam_api_interfaces.cpp src/resources.rc)
-    target_link_libraries(uc-online64 PRIVATE kernel32 /DELAYLOAD:$(CMAKE_SOURCE_DIR)/steam_api64.dll)
+    target_link_libraries(uc-online64 PRIVATE kernel32)
     target_compile_definitions(uc-online64 PRIVATE IS_64BIT)
 endif()
 

@@ -9,6 +9,8 @@ extern "C" {
     bool SteamAPI_RestartAppIfNecessary(uint32_t appId);
     bool SteamAPI_Init();
     bool SteamAPI_InitEx(const char* pchVersion);
+    bool SteamAPI_InitFlat();
+    bool SteamAPI_InitSafe();
     void SteamAPI_Shutdown();
     void SteamAPI_RunCallbacks();
     bool SteamAPI_IsSteamRunning();
