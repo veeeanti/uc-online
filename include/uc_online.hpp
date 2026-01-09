@@ -5,11 +5,6 @@
 #include <string>
 #include <memory>
 #include <windows.h>
-#include <steam/steam_api.h>
-#include <steam/isteamgameserver.h>
-#include <steam/isteamugc.h>
-#include <steam/isteamhttp.h>
-#include <steam/isteamnetworking.h>
 
 class UCOnline {
 public:
@@ -49,10 +44,4 @@ private:
     std::string _gameArguments;
     std::string _steamApiDllPath;
 
-    bool InitializeSteamInterfaces();
-    bool InitializeSteamGameServer();
-    bool InitializeSteamUGC();
-    bool InitializeSteamHTTP();
-    bool InitializeSteamNetworking();
-    bool InitializeSteamClient();
 };

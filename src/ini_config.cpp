@@ -87,6 +87,7 @@ uint32_t IniConfig::GetAppID() {
 
 void IniConfig::SetAppID(uint32_t appId) {
     SetValue("uc-online", "AppID", std::to_string(appId));
+    SaveConfig();
 }
 
 std::string IniConfig::GetGameExecutable() {
@@ -95,6 +96,7 @@ std::string IniConfig::GetGameExecutable() {
 
 void IniConfig::SetGameExecutable(const std::string& gameExePath) {
     SetValue("uc-online", "GameExecutable", gameExePath);
+    SaveConfig();
 }
 
 std::string IniConfig::GetGameArguments() {
@@ -103,6 +105,7 @@ std::string IniConfig::GetGameArguments() {
 
 void IniConfig::SetGameArguments(const std::string& arguments) {
     SetValue("uc-online", "GameArguments", arguments);
+    SaveConfig();
 }
 
 std::string IniConfig::GetSteamApiDllPath() {

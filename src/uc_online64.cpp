@@ -38,25 +38,27 @@ bool UCOnline64::InitializeUCOnline() {
             CreateAppIdFile();
         }
 
+        // Load the Steam API DLL
+        if (!_steamApiDllPath.empty()) {
+            HMODULE steamModule = LoadLibraryA(_steamApiDllPath.c_str());
+            if (!steamModule) {
+                _logger->LogError("Failed to load Steam API DLL from path: " + _steamApiDllPath);
+                return false;
+            }
+        }
+
         if (SteamAPI_RestartAppIfNecessary(_currentAppID)) {
             _logger->Log("Steam requested app restart");
             return false;
         }
 
-        SteamErrMsg errorMsg;
-        if (SteamAPI_InitEx(&errorMsg) != k_ESteamAPIInitResult_OK) {
-            std::cout << "SteamAPI_InitEx failed: " << errorMsg << std::endl;
+        if (!SteamAPI_Init()) {
+            _logger->Log("SteamAPI_Init failed");
             return false;
         }
 
         _steamInitialized = true;
         _logger->Log("Steam initialized successfully");
-
-        if (InitializeSteamInterfaces()) {
-            _logger->Log("Steam interfaces accessible");
-        } else {
-            _logger->LogWarning("Steam interfaces not accessible");
-        }
 
         return true;
     } catch (const std::exception& ex) {
@@ -124,116 +126,6 @@ void UCOnline64::CreateAppIdFile() {
 
 
 
-bool UCOnline64::InitializeSteamInterfaces() {
-    try {
-        if (!SteamUser()) {
-            _logger->LogError("SteamUser interface not available");
-            return false;
-        }
-
-        if (!SteamApps()) {
-            _logger->LogWarning("SteamApps interface not available");
-        } else {
-            _logger->Log("Successfully obtained SteamApps interface");
-        }
-
-        // Initialize all Steam interfaces
-        if (!InitializeSteamGameServer()) {
-            _logger->LogWarning("Failed to initialize Steam GameServer interface");
-        }
-
-        if (!InitializeSteamUGC()) {
-            _logger->LogWarning("Failed to initialize Steam UGC interface");
-        }
-
-        if (!InitializeSteamHTTP()) {
-            _logger->LogWarning("Failed to initialize Steam HTTP interface");
-        }
-
-        if (!InitializeSteamNetworking()) {
-            _logger->LogWarning("Failed to initialize Steam Networking interface");
-        }
-
-        if (!InitializeSteamClient()) {
-            _logger->LogWarning("Failed to initialize Steam Client interface");
-        }
-
-        return true;
-    } catch (const std::exception& ex) {
-        _logger->LogException(ex, "Error initializing Steam interfaces");
-        return false;
-    }
-}
-
-bool UCOnline64::InitializeSteamGameServer() {
-    try {
-        if (!SteamGameServer()) {
-            _logger->LogError("SteamGameServer interface not available");
-            return false;
-        }
-        _logger->Log("Successfully obtained SteamGameServer interface");
-        return true;
-    } catch (const std::exception& ex) {
-        _logger->LogException(ex, "Error initializing Steam GameServer interface");
-        return false;
-    }
-}
-
-bool UCOnline64::InitializeSteamUGC() {
-    try {
-        if (!SteamUGC()) {
-            _logger->LogError("SteamUGC interface not available");
-            return false;
-        }
-        _logger->Log("Successfully obtained SteamUGC interface");
-        return true;
-    } catch (const std::exception& ex) {
-        _logger->LogException(ex, "Error initializing Steam UGC interface");
-        return false;
-    }
-}
-
-bool UCOnline64::InitializeSteamHTTP() {
-    try {
-        if (!SteamHTTP()) {
-            _logger->LogError("SteamHTTP interface not available");
-            return false;
-        }
-        _logger->Log("Successfully obtained SteamHTTP interface");
-        return true;
-    } catch (const std::exception& ex) {
-        _logger->LogException(ex, "Error initializing Steam HTTP interface");
-        return false;
-    }
-}
-
-bool UCOnline64::InitializeSteamNetworking() {
-    try {
-        if (!SteamNetworking()) {
-            _logger->LogError("SteamNetworking interface not available");
-            return false;
-        }
-        _logger->Log("Successfully obtained SteamNetworking interface");
-        return true;
-    } catch (const std::exception& ex) {
-        _logger->LogException(ex, "Error initializing Steam Networking interface");
-        return false;
-    }
-}
-
-bool UCOnline64::InitializeSteamClient() {
-    try {
-        if (!SteamClient()) {
-            _logger->LogError("SteamClient interface not available");
-            return false;
-        }
-        _logger->Log("Successfully obtained SteamClient interface");
-        return true;
-    } catch (const std::exception& ex) {
-        _logger->LogException(ex, "Error initializing Steam Client interface");
-        return false;
-    }
-}
 
 bool UCOnline64::LaunchGame() {
     _logger->Log("Attempting to launch game: " + _gameExecutable);
