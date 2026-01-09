@@ -1,4 +1,5 @@
 #include "uc_online64.hpp"
+#include "steam_api_interfaces.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -39,22 +40,39 @@ bool UCOnline64::InitializeUCOnline() {
         }
 
         // Load the Steam API DLL
+        HMODULE steamModule = nullptr;
         if (!_steamApiDllPath.empty()) {
-            HMODULE steamModule = LoadLibraryA(_steamApiDllPath.c_str());
+            steamModule = LoadSteamAPI(_steamApiDllPath.c_str());
             if (!steamModule) {
                 _logger->LogError("Failed to load Steam API DLL from path: " + _steamApiDllPath);
                 return false;
             }
+        } else {
+            // Try to load steam_api64.dll from the default location
+            steamModule = LoadSteamAPI("steam_api64.dll");
+            if (!steamModule) {
+                _logger->LogError("Failed to load Steam API DLL from default location");
+                return false;
+            }
         }
 
-        if (SteamAPI_RestartAppIfNecessary(_currentAppID)) {
-            _logger->Log("Steam requested app restart");
-            return false;
+        // Check if SteamAPI_RestartAppIfNecessary is available
+        if (IsFunctionExported(steamModule, "SteamAPI_RestartAppIfNecessary")) {
+            if (SteamAPI_RestartAppIfNecessary(_currentAppID)) {
+                _logger->Log("Steam requested app restart");
+                return false;
+            }
         }
 
-        if (!SteamAPI_Init()) {
-            _logger->Log("SteamAPI_Init failed");
-            return false;
+        // Check if SteamAPI_Init is available
+        if (IsFunctionExported(steamModule, "SteamAPI_Init")) {
+            if (!SteamAPI_Init()) {
+                _logger->Log("SteamAPI_Init failed");
+                return false;
+            }
+        } else {
+            _logger->LogWarning("SteamAPI_Init not available, trying alternative initialization methods");
+            // Add alternative initialization methods here if needed
         }
 
         _steamInitialized = true;
