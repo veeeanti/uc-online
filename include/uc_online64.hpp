@@ -44,4 +44,28 @@ private:
     std::string _gameArguments;
     std::string _steamApiDllPath;
 
+    bool TryMultipleInitializationMethods();
+    void LoadSteamApi64Dll();
+    bool InitializeSteamInterfaces();
+
+    // Steam API function pointers
+    typedef bool (*SteamAPI_Init_t)(char* errorMessage);
+    typedef bool (*SteamAPI_InitFlat_t)(char* errorMessage);
+    typedef void (*SteamAPI_Shutdown_t)();
+    typedef void (*SteamAPI_RunCallbacks_t)();
+    typedef bool (*SteamAPI_RestartAppIfNecessary_t)(uint32_t appId);
+    typedef void* (*SteamClient_t)();
+    typedef void* (*SteamApps_t)();
+    typedef void* (*GetHSteamPipe_t)();
+
+    SteamAPI_Init_t SteamAPI_Init = nullptr;
+    SteamAPI_InitFlat_t SteamAPI_InitFlat = nullptr;
+    SteamAPI_Shutdown_t SteamAPI_Shutdown = nullptr;
+    SteamAPI_RunCallbacks_t SteamAPI_RunCallbacks = nullptr;
+    SteamAPI_RestartAppIfNecessary_t SteamAPI_RestartAppIfNecessary = nullptr;
+    SteamClient_t SteamClient = nullptr;
+    SteamApps_t SteamApps = nullptr;
+    GetHSteamPipe_t GetHSteamPipe = nullptr;
+
+    HMODULE _steamApiModule = nullptr;
 };

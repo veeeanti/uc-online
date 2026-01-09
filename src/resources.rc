@@ -21,7 +21,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName",      "union-crax.xyz"
             VALUE "FileDescription",  "uc-online Launcher"
-            VALUE "FileVersion",      "1.0.0.3"
+            VALUE "FileVersion",      "1.0.0.0"
             VALUE "InternalName",     "uc-online"
             VALUE "LegalCopyright",   "veeanti / union-crax.xyz | 2026"
 #ifdef IS_64BIT

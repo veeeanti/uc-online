@@ -1,11 +1,9 @@
 #include "uc_online.hpp"
-#include "steam_api_interfaces.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 #include <thread>
 #include <chrono>
-#include <windows.h>
 
 UCOnline::UCOnline(const std::string& iniFilePath) {
     _config = std::make_unique<IniConfig>(iniFilePath);
@@ -39,65 +37,22 @@ bool UCOnline::InitializeUCOnline() {
             CreateAppIdFile();
         }
 
-        // Load the Steam API DLL
-        HMODULE steamModule = nullptr;
-        if (!_steamApiDllPath.empty()) {
-            steamModule = LoadSteamAPI(_steamApiDllPath.c_str());
-            if (!steamModule) {
-                _logger->LogError("Failed to load Steam API DLL from path: " + _steamApiDllPath);
-                return false;
-            }
-        } else {
-            // Try to load steam_api.dll from the default location
-            steamModule = LoadSteamAPI("steam_api.dll");
-            if (!steamModule) {
-                _logger->LogError("Failed to load Steam API DLL from default location");
-                return false;
-            }
-        }
+        LoadSteamApiDll();
 
-        // Try different Steam API initialization functions
-        bool steamInitialized = false;
-        
-        if (IsFunctionExported(steamModule, "SteamAPI_Init")) {
-            if (SteamAPI_Init()) {
-                steamInitialized = true;
-            } else {
-                _logger->Log("SteamAPI_Init failed");
-            }
-        }
+        bool result = TryMultipleInitializationMethods();
 
-        if (!steamInitialized && IsFunctionExported(steamModule, "SteamAPI_InitEx")) {
-            if (SteamAPI_InitEx("uc-online")) {
-                steamInitialized = true;
-            } else {
-                _logger->Log("SteamAPI_InitEx failed");
-            }
-        }
-
-        if (!steamInitialized && IsFunctionExported(steamModule, "SteamAPI_InitFlat")) {
-            if (SteamAPI_InitFlat()) {
-                steamInitialized = true;
-            } else {
-                _logger->Log("SteamAPI_InitFlat failed");
-            }
-        }
-
-        if (!steamInitialized && IsFunctionExported(steamModule, "SteamAPI_InitSafe")) {
-            if (SteamAPI_InitSafe()) {
-                steamInitialized = true;
-            } else {
-                _logger->Log("SteamAPI_InitSafe failed");
-            }
-        }
-
-        if (!steamInitialized) {
-            _logger->LogError("Failed to initialize Steam with any available method");
+        if (!result) {
             return false;
         }
 
         _steamInitialized = true;
         _logger->Log("Steam initialized successfully");
+
+        if (InitializeSteamInterfaces()) {
+            _logger->Log("Steam interfaces accessible");
+        } else {
+            _logger->LogWarning("Steam interfaces not accessible");
+        }
 
         return true;
     } catch (const std::exception& ex) {
@@ -109,14 +64,14 @@ bool UCOnline::InitializeUCOnline() {
 void UCOnline::ShutdownUCOnline() {
     if (_steamInitialized) {
         _logger->Log("Shutting down...");
-        SteamAPI_Shutdown();
+        if (SteamAPI_Shutdown) SteamAPI_Shutdown();
         _steamInitialized = false;
         _logger->Log("Shutdown complete!");
     }
 }
 
 void UCOnline::RunSteamCallbacks() {
-    if (_steamInitialized) {
+    if (_steamInitialized && SteamAPI_RunCallbacks) {
         SteamAPI_RunCallbacks();
     }
 }
@@ -163,8 +118,143 @@ void UCOnline::CreateAppIdFile() {
     }
 }
 
+void UCOnline::LoadSteamApiDll() {
+    try {
+#ifdef _WIN64
+        std::string dllName = "steam_api64.dll";
+#else
+        std::string dllName = "steam_api.dll";
+#endif
 
+        _logger->Log(std::string("Current process is ") +
+#ifdef _WIN64
+            std::string("64-bit")
+#else
+            std::string("32-bit")
+#endif
+            + std::string(", looking for ") + dllName);
 
+        if (_steamApiDllPath.empty()) {
+            _logger->Log("No custom steam_api.dll path configured, using default path: same directory as this is running from.");
+            // Load default
+            _steamApiModule = LoadLibraryA(dllName.c_str());
+        } else {
+            std::filesystem::path dllPath = std::filesystem::path(_steamApiDllPath) / dllName;
+            if (std::filesystem::exists(dllPath)) {
+                _logger->Log("Found " + dllName + " at: " + dllPath.string());
+                _steamApiModule = LoadLibraryA(dllPath.string().c_str());
+                if (_steamApiModule) {
+                    _logger->Log("Successfully loaded " + dllName + " from set path");
+                } else {
+                    _logger->LogWarning("Failed to load " + dllName + " from set path, likely wasn't written correctly, so it's falling back to the default path - next to this / in the same directory.");
+                    _steamApiModule = LoadLibraryA(dllName.c_str());
+                }
+            } else {
+#ifdef _WIN64
+                std::filesystem::path win64Path = std::filesystem::path(_steamApiDllPath) / "win64" / dllName;
+                if (std::filesystem::exists(win64Path)) {
+                    _logger->Log("Found " + dllName + " at: " + win64Path.string());
+                    _steamApiModule = LoadLibraryA(win64Path.string().c_str());
+                    if (_steamApiModule) {
+                        _logger->Log("Successfully loaded " + dllName + " from win64 subdirectory");
+                        goto load_functions;
+                    } else {
+                        _logger->LogWarning("Failed to load " + dllName + " from win64 subdirectory, falling back to default loading");
+                    }
+                }
+#endif
+                _logger->LogWarning(dllName + " not found at configured path, using default loading");
+                _steamApiModule = LoadLibraryA(dllName.c_str());
+            }
+        }
+
+    load_functions:
+        if (_steamApiModule) {
+            SteamAPI_Init = (SteamAPI_Init_t)GetProcAddress(_steamApiModule, "SteamAPI_Init");
+            SteamAPI_InitFlat = (SteamAPI_InitFlat_t)GetProcAddress(_steamApiModule, "SteamAPI_InitFlat");
+            SteamAPI_Shutdown = (SteamAPI_Shutdown_t)GetProcAddress(_steamApiModule, "SteamAPI_Shutdown");
+            SteamAPI_RunCallbacks = (SteamAPI_RunCallbacks_t)GetProcAddress(_steamApiModule, "SteamAPI_RunCallbacks");
+            SteamAPI_RestartAppIfNecessary = (SteamAPI_RestartAppIfNecessary_t)GetProcAddress(_steamApiModule, "SteamAPI_RestartAppIfNecessary");
+            SteamClient = (SteamClient_t)GetProcAddress(_steamApiModule, "SteamClient");
+            SteamApps = (SteamApps_t)GetProcAddress(_steamApiModule, "SteamApps");
+            GetHSteamPipe = (GetHSteamPipe_t)GetProcAddress(_steamApiModule, "GetHSteamPipe");
+        } else {
+            _logger->LogError("Failed to load steam_api.dll");
+        }
+    } catch (const std::exception& ex) {
+        _logger->LogException(ex, "Error loading steam_api.dll");
+        std::cout << "Error loading steam_api.dll: " << ex.what() << std::endl;
+    }
+}
+
+bool UCOnline::TryMultipleInitializationMethods() {
+    if (!SteamAPI_Init) return false;
+
+    char errorMsg[1024] = {0};
+    bool result = SteamAPI_Init(errorMsg);
+
+    if (result) {
+        _logger->Log("SteamAPI_Init succeeded");
+        return true;
+    } else {
+        _logger->Log("SteamAPI_Init failed: " + std::string(errorMsg));
+
+        if (SteamAPI_InitFlat) {
+            char errorMsgFlat[1024] = {0};
+            bool resultFlat = SteamAPI_InitFlat(errorMsgFlat);
+
+            if (resultFlat) {
+                _logger->Log("SteamAPI_InitFlat succeeded");
+                return true;
+            } else {
+                _logger->Log("SteamAPI_InitFlat failed: " + std::string(errorMsgFlat));
+
+                if (SteamAPI_RestartAppIfNecessary && SteamAPI_RestartAppIfNecessary(_currentAppID)) {
+                    _logger->Log("Steam requested app restart");
+                    return false;
+                }
+
+                return false;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool UCOnline::InitializeSteamInterfaces() {
+    try {
+        if (SteamClient) {
+            void* steamClient = SteamClient();
+            if (!steamClient) {
+                _logger->LogError("Failed to get SteamClient");
+                return false;
+            }
+        }
+
+        if (GetHSteamPipe) {
+            void* hSteamPipe = GetHSteamPipe();
+            if (!hSteamPipe) {
+                _logger->LogError("Failed to get HSteamPipe");
+                return false;
+            }
+        }
+
+        if (SteamApps) {
+            void* steamApps = SteamApps();
+            if (!steamApps) {
+                _logger->LogWarning("SteamApps interface not available or cannot be found");
+            } else {
+                _logger->Log("Successfully obtained SteamApps interface");
+            }
+        }
+
+        return true;
+    } catch (const std::exception& ex) {
+        _logger->LogException(ex, "Error initializing Steam interfaces");
+        return false;
+    }
+}
 
 bool UCOnline::LaunchGame() {
     _logger->Log("Attempting to launch game: " + _gameExecutable);
