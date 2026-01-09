@@ -6,24 +6,31 @@ bool IsFunctionExported(HMODULE hModule, const char* functionName) {
     return GetProcAddress(hModule, functionName) != nullptr;
 }
 
-// Function to load Steam API DLL and check for required exports
+// Function to load Steam API DLL and try different initialization functions
 HMODULE LoadSteamAPI(const char* dllPath) {
     HMODULE hModule = LoadLibraryA(dllPath);
     if (!hModule) {
         return nullptr;
     }
     
-    // Check for required exports
-    bool hasSteamAPI_Init = IsFunctionExported(hModule, "SteamAPI_Init");
-    bool hasSteamAPI_Shutdown = IsFunctionExported(hModule, "SteamAPI_Shutdown");
-    bool hasSteamAPI_RunCallbacks = IsFunctionExported(hModule, "SteamAPI_RunCallbacks");
-    bool hasSteamAPI_RestartAppIfNecessary = IsFunctionExported(hModule, "SteamAPI_RestartAppIfNecessary");
-    
-    // If any of the required functions are missing, unload the DLL and return nullptr
-    if (!hasSteamAPI_Init || !hasSteamAPI_Shutdown || !hasSteamAPI_RunCallbacks || !hasSteamAPI_RestartAppIfNecessary) {
-        FreeLibrary(hModule);
-        return nullptr;
+    // Try different Steam API initialization functions
+    if (IsFunctionExported(hModule, "SteamAPI_Init")) {
+        return hModule;
     }
     
-    return hModule;
+    if (IsFunctionExported(hModule, "SteamAPI_InitEx")) {
+        return hModule;
+    }
+    
+    if (IsFunctionExported(hModule, "SteamAPI_InitFlat")) {
+        return hModule;
+    }
+    
+    if (IsFunctionExported(hModule, "SteamAPI_InitSafe")) {
+        return hModule;
+    }
+    
+    // If none of the initialization functions are available, unload the DLL and return nullptr
+    FreeLibrary(hModule);
+    return nullptr;
 }

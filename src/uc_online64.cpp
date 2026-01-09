@@ -56,23 +56,44 @@ bool UCOnline64::InitializeUCOnline() {
             }
         }
 
-        // Check if SteamAPI_RestartAppIfNecessary is available
-        if (IsFunctionExported(steamModule, "SteamAPI_RestartAppIfNecessary")) {
-            if (SteamAPI_RestartAppIfNecessary(_currentAppID)) {
-                _logger->Log("Steam requested app restart");
-                return false;
+        // Try different Steam API initialization functions
+        bool steamInitialized = false;
+        
+        if (IsFunctionExported(steamModule, "SteamAPI_Init")) {
+            if (SteamAPI_Init()) {
+                steamInitialized = true;
+            } else {
+                _logger->Log("SteamAPI_Init failed");
             }
         }
 
-        // Check if SteamAPI_Init is available
-        if (IsFunctionExported(steamModule, "SteamAPI_Init")) {
-            if (!SteamAPI_Init()) {
-                _logger->Log("SteamAPI_Init failed");
-                return false;
+        if (!steamInitialized && IsFunctionExported(steamModule, "SteamAPI_InitEx")) {
+            if (SteamAPI_InitEx("uc-online")) {
+                steamInitialized = true;
+            } else {
+                _logger->Log("SteamAPI_InitEx failed");
             }
-        } else {
-            _logger->LogWarning("SteamAPI_Init not available, trying alternative initialization methods");
-            // Add alternative initialization methods here if needed
+        }
+
+        if (!steamInitialized && IsFunctionExported(steamModule, "SteamAPI_InitFlat")) {
+            if (SteamAPI_InitFlat()) {
+                steamInitialized = true;
+            } else {
+                _logger->Log("SteamAPI_InitFlat failed");
+            }
+        }
+
+        if (!steamInitialized && IsFunctionExported(steamModule, "SteamAPI_InitSafe")) {
+            if (SteamAPI_InitSafe()) {
+                steamInitialized = true;
+            } else {
+                _logger->Log("SteamAPI_InitSafe failed");
+            }
+        }
+
+        if (!steamInitialized) {
+            _logger->LogError("Failed to initialize Steam with any available method");
+            return false;
         }
 
         _steamInitialized = true;
