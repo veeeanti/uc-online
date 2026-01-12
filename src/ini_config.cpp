@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 
 IniConfig::IniConfig(const std::string& iniFilePath) : _iniFilePath(iniFilePath) {
     LoadConfig();
@@ -105,53 +106,52 @@ void IniConfig::SetGameArguments(const std::string& arguments) {
     SetValue("uc-online", "GameArguments", arguments);
 }
 
-std::string IniConfig::GetSteamApiDllPath() {
-    return GetValue("uc-online", "SteamApiDLLPath", "");
+std::string IniConfig::GetSteamApiLibPath() {
+    return GetValue("uc-online", "SteamApiLibPath", "");
 }
 
-void IniConfig::SetSteamApiDllPath(const std::string& dllPath) {
-    SetValue("uc-online", "SteamApiDLLPath", dllPath);
+void IniConfig::SetSteamApiLibPath(const std::string& libPath) {
+    SetValue("uc-online", "SteamApiLibPath", libPath);
     SaveConfig();
 }
 
 void IniConfig::CreateDefaultConfig() {
     std::string defaultConfig = R"(
 [uc-online]
-# Set the appID to be used here, e.g., 730 for Counter-Strike 2)
+# Set the appID to be used here, e.g., 730 for Counter-Strike 2
 # (Please note that you will want to set it to a game you can get for free that is multiplayer. Anything else, and it won't work.)
 # Default appID is set to 480 (Spacewar), however you can change it to any appID you want.
 AppID = 480
 
-# Executable needs to be set directly. Unlike the dll, there is no 'default' for the exe.
-# Using UE5 games as an example, the correct launcher path will look like this:
-# game folder\game folder\Binaries\Win64\game folder-Win64-Shipping.exe
-GameExecutable = 
+# Executable needs to be set directly. Unlike the library, there is no 'default' for the exe.
+# For Linux games, this would typically be a .sh script or a binary
+# Example: ./game.sh or ./game.x86_64
+GameExecutable =
 
-# Set launch arguments where necessary - e.g., for Source Engine games like Half-Life: Source, set it to '-game hl1 -windowed' to launch it correctly.
-GameArguments = 
+# Set launch arguments where necessary
+GameArguments =
 
 # Set the path to the steam_appid.txt file to use. (If one does not exist, it will be generated with the appID set at the top.)
 SteamAppIdFile = steam_appid.txt
 
-# Path to steam_api.dll (leave empty to use default location - in the same folder next to the launcher.)
-# Only set the path as the folder containing the dll relative to the launcher.
-# Again, using UE5 games as an example:
-# game folder\Engine\Binaries\ThirdParty\Steamworks\Steamv153\Win64
-SteamApiDLLPath = 
+# Path to steamclient.so (leave empty to use default location - typically in Steam runtime)
+# For Linux, Steam libraries are usually in Steam runtime paths like:
+# ~/.steam/steam/ubuntu12_32/steamclient.so
+# ~/.local/share/Steam/ubuntu12_32/steamclient.so
+# Proton paths: ~/.steam/steam/steamapps/common/Proton XX/dist/lib/
+SteamApiLibPath =
 
 [Logging]
-# Turns on logging. Not much gets logged, so it's not exactly useful. I recommend keeping it set to false, however with it being rewritten, it seems to behave differently.
-# It doesn't give you a chance to see what the issue was if you set something incorrectly, it just closes immediately or runs for a second and then closes. 
-# If you need it, set it to true. Otherwise, there's nothing really worth logging.
+# Turns on logging. Not much gets logged, so it's not exactly useful.
 EnableLogging = false
 LogFile = uc_online.log
 )";
 
-    std::ofstream file(_iniFilePath);
-    if (file.is_open()) {
-        file << defaultConfig;
-        LoadConfig();
-    } else {
-        std::cerr << "Error creating default config: " << _iniFilePath << std::endl;
-    }
+std::ofstream file(_iniFilePath);
+if (file.is_open()) {
+    file << defaultConfig;
+    LoadConfig();
+} else {
+    std::cerr << "Error creating default config: " << _iniFilePath << std::endl;
+}
 }

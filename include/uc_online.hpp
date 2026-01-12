@@ -4,12 +4,8 @@
 #include "logger.hpp"
 #include <string>
 #include <memory>
-#include <windows.h>
-#include <steam/steam_api.h>
-#include <steam/isteamgameserver.h>
-#include <steam/isteamugc.h>
-#include <steam/isteamhttp.h>
-#include <steam/isteamnetworking.h>
+#include <dlfcn.h>
+#include <cstdint>
 
 class UCOnline {
 public:
@@ -37,8 +33,14 @@ public:
     bool IsLoggingEnabled() const;
     void ClearLog();
 
-    std::string GetSteamApiDllPath() const;
-    void SetSteamApiDllPath(const std::string& dllPath);
+    std::string GetSteamApiLibPath() const;
+    void SetSteamApiLibPath(const std::string& libPath);
+
+    // Public methods to access Steamworks interfaces
+    bool InitializeGameServer(uint32_t ip, uint16_t port, uint16_t gamePort, uint16_t queryPort, uint32_t flags, const char* version);
+    void ShutdownGameServer();
+    void RunGameServerCallbacks();
+    bool SendP2PPacket(uint64_t steamIDRemote, const void* pubData, uint32_t cubData, int nChannel, int nSendType);
 
 private:
     bool _steamInitialized = false;
@@ -47,12 +49,60 @@ private:
     std::unique_ptr<Logger> _logger;
     std::string _gameExecutable;
     std::string _gameArguments;
-    std::string _steamApiDllPath;
+    std::string _steamApiLibPath;
 
+    bool TryMultipleInitializationMethods();
+    void LoadSteamApiLib();
     bool InitializeSteamInterfaces();
-    bool InitializeSteamGameServer();
-    bool InitializeSteamUGC();
-    bool InitializeSteamHTTP();
-    bool InitializeSteamNetworking();
-    bool InitializeSteamClient();
+
+    // Steam API function pointers
+typedef bool (*SteamAPI_Init_t)(char* errorMessage);
+typedef bool (*SteamAPI_InitFlat_t)(char* errorMessage);
+typedef void (*SteamAPI_Shutdown_t)();
+typedef void (*SteamAPI_RunCallbacks_t)();
+typedef bool (*SteamAPI_RestartAppIfNecessary_t)(uint32_t appId);
+typedef void* (*SteamClient_t)();
+typedef void* (*SteamApps_t)();
+typedef void* (*GetHSteamPipe_t)();
+
+    // GameServer interfaces
+typedef bool (*GameServer_Init_t)(uint32_t ip, uint16_t port, uint16_t gamePort, uint16_t queryPort, uint32_t flags, const char* version);
+typedef void (*GameServer_Shutdown_t)();
+typedef void (*GameServer_RunCallbacks_t)();
+
+    // Networking interfaces
+typedef void* (*SteamNetworking_t)();
+typedef bool (*SteamP2P_SendPacket_t)(uint64_t steamIDRemote, const void* pubData, uint32_t cubData, int nChannel, int nSendType);
+
+    // UGC interfaces
+typedef void* (*SteamUGC_t)();
+
+    // HTTP interfaces
+typedef void* (*SteamHTTP_t)();
+
+    SteamAPI_Init_t SteamAPI_Init = nullptr;
+    SteamAPI_InitFlat_t SteamAPI_InitFlat = nullptr;
+    SteamAPI_Shutdown_t SteamAPI_Shutdown = nullptr;
+    SteamAPI_RunCallbacks_t SteamAPI_RunCallbacks = nullptr;
+    SteamAPI_RestartAppIfNecessary_t SteamAPI_RestartAppIfNecessary = nullptr;
+    SteamClient_t SteamClient = nullptr;
+    SteamApps_t SteamApps = nullptr;
+    GetHSteamPipe_t GetHSteamPipe = nullptr;
+
+    // GameServer function pointers
+    GameServer_Init_t GameServer_Init = nullptr;
+    GameServer_Shutdown_t GameServer_Shutdown = nullptr;
+    GameServer_RunCallbacks_t GameServer_RunCallbacks = nullptr;
+
+    // Networking function pointers
+    SteamNetworking_t SteamNetworking = nullptr;
+    SteamP2P_SendPacket_t SteamP2P_SendPacket = nullptr;
+
+    // UGC function pointers
+    SteamUGC_t SteamUGC = nullptr;
+
+    // HTTP function pointers
+    SteamHTTP_t SteamHTTP = nullptr;
+
+    void* _steamApiModule = nullptr;
 };

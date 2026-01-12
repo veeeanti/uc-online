@@ -1,9 +1,13 @@
 #include "logger.hpp"
 #include <fstream>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <ctime>
+#include <mutex>
 
 Logger::Logger(const std::string& logFilePath, bool enableLogging)
-    : _logFilePath(logFilePath), _loggingEnabled(enableLogging) {
+: _logFilePath(logFilePath), _loggingEnabled(enableLogging) {
     if (_loggingEnabled) {
         Log("Logger initialized");
     }
@@ -90,7 +94,7 @@ std::string Logger::GetCurrentTimeString() const {
     auto now = std::chrono::system_clock::now();
     auto time_t = std::chrono::system_clock::to_time_t(now);
     std::tm tm;
-    localtime_s(&tm, &time_t);
+    localtime_r(&time_t, &tm);
     std::stringstream ss;
     ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
     return ss.str();

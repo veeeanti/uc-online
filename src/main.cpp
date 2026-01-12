@@ -4,8 +4,8 @@
 #include <chrono>
 
 int main() {
-    std::cout << "uc-online Launcher 32-bit" << std::endl;
-    std::cout << "=========================" << std::endl << std::endl;
+    std::cout << "uc-online Launcher" << std::endl;
+    std::cout << "==================" << std::endl << std::endl;
 
     UCOnline uc_online;
 
@@ -49,7 +49,7 @@ int main() {
                 uc_online.RunSteamCallbacks();
             }
             std::this_thread::sleep_for(std::chrono::seconds(1));
-            std::cout << "Trying to run the game... This usually means it won't run even after successfully initializing Steam using a spoofed appid. Double check your config, especially the gameexecutable line." << std::endl; 
+            std::cout << "Trying to run the game... This usually means it won't run even after successfully initializing Steam using a spoofed appid. Double check your config, especially the gameexecutable line." << std::endl;
             std::cout << "(" << (i + 1) << "/5 seconds until this window automatically closes unless game launch succeeds.)" << std::endl;
         }
 
