@@ -1,9 +1,10 @@
 name: Build C++ Version for linux
-push:
-  branches:
+
+on:
+  push:
+    branches:
     - main
     - linux-noconsole
-on:
   workflow_dispatch: 
 
 jobs:
