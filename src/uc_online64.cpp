@@ -164,19 +164,16 @@ bool UCOnline64::LaunchGame() {
 
     if (_gameExecutable.empty()) {
         _logger->LogError("No game executable configured in config.ini file. You'll need to do that to get anywhere here.");
-        std::cout << "No game executable configured in config.ini file. (I suggest you set it lol)" << std::endl;
         return false;
     }
 
     if (!std::filesystem::exists(_gameExecutable)) {
         _logger->LogError("Game executable not found (Did you write it correctly? Path and all too, if applicable.): " + _gameExecutable);
-        std::cout << "Game executable not found (Did you write it correctly? Path and all too, if applicable.): " << _gameExecutable << std::endl;
         return false;
     }
 
     try {
         _logger->Log("Launching game: " + _gameExecutable + " " + _gameArguments);
-        std::cout << "Launching game: " << _gameExecutable << " " << _gameArguments << std::endl;
 
         std::filesystem::path exePath(_gameExecutable);
         std::string workingDir = exePath.parent_path().string();
@@ -199,14 +196,12 @@ bool UCOnline64::LaunchGame() {
 
         if (posix_spawn(&pid, _gameExecutable.c_str(), nullptr, &attr, argv, environ) == 0) {
             _logger->Log("Game launched successfully! (PID: " + std::to_string(pid) + ")");
-            std::cout << "Game launched successfully! The game's window should appear shortly. This window can be closed and / or may close on its own." << std::endl;
             // Free allocated strings
             for (int i = 0; i < argc; ++i) free(argv[i]);
             posix_spawnattr_destroy(&attr);
             return true;
         } else {
             _logger->LogError("Failed to launch game process");
-            std::cout << "Failed to launch game process" << std::endl;
             // Free allocated strings
             for (int i = 0; i < argc; ++i) free(argv[i]);
             posix_spawnattr_destroy(&attr);
@@ -215,7 +210,6 @@ bool UCOnline64::LaunchGame() {
     } catch (const std::exception& ex) {
         _logger->LogException(ex, "Game launch failed");
         _logger->Log("This can happen for many reasons, if you're certain it should work then just try whatever you can. Throw whatever you got at the wall and see what sticks.");
-        std::cout << "Error launching game: " << ex.what() << std::endl;
         return false;
     }
 }

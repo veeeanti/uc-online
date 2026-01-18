@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 project(uc-online VERSION 1.0.0 LANGUAGES CXX)
 
 # This is a Linux-only build
-if(NOT UNIX)
-    message(FATAL_ERROR "This project is Linux-only")
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(STATUS "This project is strictly Linux-only.")
+    message(STATUS "CMake configuration will continue, but compilation will fail on non-Linux systems.")
+    message(STATUS "Current system: ${CMAKE_SYSTEM_NAME} (${CMAKE_SYSTEM_PROCESSOR})")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -23,6 +25,7 @@ function(add_linux_target target_name arch_dir steam_lib)
         src/uc_online.cpp
         src/ini_config.cpp
         src/logger.cpp
+        src/error_dialog.cpp
     )
     
     # Set architecture-specific compile and link flags
