@@ -116,7 +116,6 @@ void UCOnline::CreateAppIdFile() {
             _logger->Log("Created steam_appid.txt at: " + appIdFilePath + " with appid: " + std::to_string(_currentAppID));
         } else {
             std::cerr << "Failed to create steam_appid.txt at: " << appIdFilePath << std::endl;
-            std::cerr << "Make sure you have write permissions in the executable directory." << std::endl;
         }
     } catch (const std::exception& ex) {
         std::cerr << "Failed to create steam_appid.txt: " << ex.what() << std::endl;

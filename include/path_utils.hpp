@@ -42,7 +42,9 @@ private:
         if (result == 0) {
             throw std::runtime_error("Failed to get executable path: GetModuleFileNameA failed");
         }
-        if (result == MAX_PATH) {
+        // Check for buffer overflow: if result == MAX_PATH, the buffer may have been truncated
+        // In this case, GetLastError() will return ERROR_INSUFFICIENT_BUFFER
+        if (result == MAX_PATH && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
             throw std::runtime_error("Failed to get executable path: path too long");
         }
         std::filesystem::path exePath(buffer);
