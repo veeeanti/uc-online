@@ -4,7 +4,7 @@
 #include <iostream>
 #include <algorithm>
 
-IniConfig::IniConfig(const std::string& iniFilePath) : _iniFilePath(iniFilePath) {
+IniConfig::IniConfig(const std::string& iniFilePath) : _iniFilePath(PathUtils::ResolveRelativeToExecutable(iniFilePath)) {
     LoadConfig();
 }
 

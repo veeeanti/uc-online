@@ -2,6 +2,7 @@
 
 #include "ini_config.hpp"
 #include "logger.hpp"
+#include "path_utils.hpp"
 #include <string>
 #include <memory>
 #include <windows.h>

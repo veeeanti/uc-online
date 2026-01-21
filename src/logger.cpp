@@ -3,7 +3,7 @@
 #include <iostream>
 
 Logger::Logger(const std::string& logFilePath, bool enableLogging)
-    : _logFilePath(logFilePath), _loggingEnabled(enableLogging) {
+    : _logFilePath(PathUtils::ResolveRelativeToExecutable(logFilePath)), _loggingEnabled(enableLogging) {
     if (_loggingEnabled) {
         Log("Logger initialized");
     }
