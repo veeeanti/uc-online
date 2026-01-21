@@ -139,12 +139,14 @@ void UCOnline::LoadSteamApiDll() {
             // Load default
             _steamApiModule = LoadLibraryA(dllName.c_str());
         } else {
+            bool loadedFromCustom = false;
             std::filesystem::path dllPath = std::filesystem::path(_steamApiDllPath) / dllName;
             if (std::filesystem::exists(dllPath)) {
                 _logger->Log("Found " + dllName + " at: " + dllPath.string());
                 _steamApiModule = LoadLibraryA(dllPath.string().c_str());
                 if (_steamApiModule) {
                     _logger->Log("Successfully loaded " + dllName + " from set path");
+                    loadedFromCustom = true;
                 } else {
                     _logger->LogWarning("Failed to load " + dllName + " from set path, likely wasn't written correctly, so it's falling back to the default path - next to this / in the same directory.");
                     _steamApiModule = LoadLibraryA(dllName.c_str());
@@ -157,18 +159,21 @@ void UCOnline::LoadSteamApiDll() {
                     _steamApiModule = LoadLibraryA(win64Path.string().c_str());
                     if (_steamApiModule) {
                         _logger->Log("Successfully loaded " + dllName + " from win64 subdirectory");
-                        goto load_functions;
+                        loadedFromCustom = true;
                     } else {
                         _logger->LogWarning("Failed to load " + dllName + " from win64 subdirectory, falling back to default loading");
+                        _steamApiModule = LoadLibraryA(dllName.c_str());
                     }
+                } else {
+                    _logger->LogWarning(dllName + " not found at configured path, using default loading");
+                    _steamApiModule = LoadLibraryA(dllName.c_str());
                 }
-#endif
+#else
                 _logger->LogWarning(dllName + " not found at configured path, using default loading");
                 _steamApiModule = LoadLibraryA(dllName.c_str());
+#endif
             }
         }
-
-    load_functions:
         if (_steamApiModule) {
             SteamAPI_Init = (SteamAPI_Init_t)GetProcAddress(_steamApiModule, "SteamAPI_Init");
             SteamAPI_InitFlat = (SteamAPI_InitFlat_t)GetProcAddress(_steamApiModule, "SteamAPI_InitFlat");
