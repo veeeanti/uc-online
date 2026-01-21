@@ -9,20 +9,14 @@ class PathUtils {
 public:
     // Get the directory where the executable is located
     static std::string GetExecutableDirectory() {
-        char buffer[MAX_PATH];
-        DWORD result = GetModuleFileNameA(NULL, buffer, MAX_PATH);
-        if (result == 0) {
-            throw std::runtime_error("Failed to get executable path: GetModuleFileNameA failed");
-        }
-        if (result == MAX_PATH) {
-            throw std::runtime_error("Failed to get executable path: path too long");
-        }
-        std::filesystem::path exePath(buffer);
-        return exePath.parent_path().string();
+        static std::string cachedExeDir = InitializeExecutableDirectory();
+        return cachedExeDir;
     }
 
     // Resolve a path relative to the executable directory
-    // Returns empty string if relativePath is empty (preserves original behavior)
+    // If relativePath is empty, returns empty string (allows optional file paths)
+    // If relativePath is absolute, returns it unchanged
+    // Otherwise, returns the path relative to the executable directory
     static std::string ResolveRelativeToExecutable(const std::string& relativePath) {
         if (relativePath.empty()) {
             return relativePath;
@@ -38,5 +32,20 @@ public:
         std::filesystem::path exeDir = GetExecutableDirectory();
         std::filesystem::path fullPath = exeDir / relativePath;
         return fullPath.string();
+    }
+
+private:
+    // Initialize the executable directory (called once via static initialization)
+    static std::string InitializeExecutableDirectory() {
+        char buffer[MAX_PATH];
+        DWORD result = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+        if (result == 0) {
+            throw std::runtime_error("Failed to get executable path: GetModuleFileNameA failed");
+        }
+        if (result == MAX_PATH) {
+            throw std::runtime_error("Failed to get executable path: path too long");
+        }
+        std::filesystem::path exePath(buffer);
+        return exePath.parent_path().string();
     }
 };
