@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <filesystem>
+#include "path_utils.hpp"
 
 class IniConfig {
 public:
