@@ -5,6 +5,7 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include "path_utils.hpp"
 
 class Logger {
 public:

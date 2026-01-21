@@ -109,13 +109,14 @@ void UCOnline::CreateAppIdFile() {
     }
 
     try {
-        std::ofstream file("steam_appid.txt");
+        std::string appIdFilePath = PathUtils::ResolveRelativeToExecutable("steam_appid.txt");
+        std::ofstream file(appIdFilePath);
         if (file.is_open()) {
             file << _currentAppID;
-            _logger->Log("Created steam_appid.txt with set appid: " + std::to_string(_currentAppID));
+            _logger->Log("Created steam_appid.txt at: " + appIdFilePath + " with appid: " + std::to_string(_currentAppID));
         } else {
-            std::cerr << "Failed to create steam_appid.txt, make sure you're running this in a directory like your Documents or Downloads folder." << std::endl;
-            std::cerr << "(e.g., \"C:\\Users\\user\\Downloads\\game folder\")" << std::endl;
+            std::cerr << "Failed to create steam_appid.txt at: " << appIdFilePath << std::endl;
+            std::cerr << "Make sure you have write permissions in the executable directory." << std::endl;
         }
     } catch (const std::exception& ex) {
         std::cerr << "Failed to create steam_appid.txt: " << ex.what() << std::endl;
