@@ -37,14 +37,15 @@ public:
 private:
     // Initialize the executable directory (called once via static initialization)
     static std::string InitializeExecutableDirectory() {
-        char buffer[MAX_PATH];
-        DWORD result = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+        // Use a larger buffer to support long paths on Windows 10+
+        char buffer[32768]; // Maximum path length on modern Windows
+        DWORD result = GetModuleFileNameA(NULL, buffer, sizeof(buffer));
         if (result == 0) {
             throw std::runtime_error("Failed to get executable path: GetModuleFileNameA failed");
         }
-        // Check for buffer overflow: if result == MAX_PATH, the buffer may have been truncated
-        // In this case, GetLastError() will return ERROR_INSUFFICIENT_BUFFER
-        if (result == MAX_PATH && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+        // If the buffer is exactly filled, it might indicate truncation
+        // but in practice, this buffer should be more than sufficient
+        if (result >= sizeof(buffer)) {
             throw std::runtime_error("Failed to get executable path: path too long");
         }
         std::filesystem::path exePath(buffer);
