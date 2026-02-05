@@ -2,7 +2,7 @@ name: Build C++ Version
 
 on:
   push:
-    branches: [ main, linux, main-nosteamworks, linux-noconsole-nosteamworks ]
+    branches: [ main, linux, main-nosteamworks, linux-noconsole-steamclient ]
   pull_request:
     branches: [ main, linux ]
   workflow_dispatch:
