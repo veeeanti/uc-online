@@ -118,6 +118,12 @@ void UCOnline::CreateAppIdFile() {
     }
 }
 
+bool UCOnline::LaunchGame() {
+    _logger->Log("LaunchGame() called - functionality not yet implemented");
+    // TODO: Implement game launching functionality
+    return false;
+}
+
 void UCOnline::LoadSteamApiDll() {
     try {
 #ifdef _WIN64

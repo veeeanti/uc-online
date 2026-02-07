@@ -118,6 +118,12 @@ void UCOnline64::CreateAppIdFile() {
     }
 }
 
+bool UCOnline64::LaunchGame() {
+    _logger->Log("LaunchGame() called - functionality not yet implemented");
+    // TODO: Implement game launching functionality
+    return false;
+}
+
 void UCOnline64::LoadSteamApi64Dll() {
     try {
         std::string dllName = "steam_api64.dll";
