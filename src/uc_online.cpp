@@ -8,8 +8,8 @@
 UCOnline::UCOnline(const std::string& iniFilePath) {
     _config = std::make_unique<IniConfig>(iniFilePath);
     _currentAppID = _config->GetAppID();
-    _gameExecutable = _config->GetGameExecutable();
-    _gameArguments = _config->GetGameArguments();
+    ////gameExecutable = _config->GetGameExecutable();
+    ////gameArguments = _config->GetGameArguments();
     _steamApiDllPath = _config->GetSteamApiDllPath();
 
     std::string logFile = _config->GetValue("Logging", "LogFile", "uc_online.log");
@@ -17,7 +17,7 @@ UCOnline::UCOnline(const std::string& iniFilePath) {
     _logger = std::make_unique<Logger>(logFile, enableLogging);
 
     _logger->Log("uc-online initialized with appid: " + std::to_string(_currentAppID));
-    _logger->Log("Game executable: " + (_gameExecutable.empty() ? "not configured" : _gameExecutable));
+    //_logger->Log("Game executable: " + (_gameExecutable.empty() ? "not configured" : _gameExecutable));
     _logger->Log("steam_api.dll path: " + (_steamApiDllPath.empty() ? "default loading" : _steamApiDllPath));
 }
 
@@ -261,84 +261,38 @@ bool UCOnline::InitializeSteamInterfaces() {
     }
 }
 
-bool UCOnline::LaunchGame() {
-    _logger->Log("Attempting to launch game: " + _gameExecutable);
+//void UCOnline::SetGameExecutable(const std::string& gameExePath) {
+//    _gameExecutable = gameExePath;
+//    _config->SetGameExecutable(gameExePath);
+//    _config->SaveConfig();
+//}
 
-    if (_gameExecutable.empty()) {
-        _logger->LogError("No game executable configured in config.ini file. You'll need to do that to get anywhere here.");
-        std::cout << "No game executable configured in config.ini file. (I suggest you set it lol)" << std::endl;
-        return false;
-    }
+//void UCOnline::SetGameArguments(const std::string& arguments) {
+//    _gameArguments = arguments;
+//    _config->SetGameArguments(arguments);
+//    _config->SaveConfig();
+//}
 
-    if (!std::filesystem::exists(_gameExecutable)) {
-        _logger->LogError("Game executable not found (Did you write it correctly? Path and all too, if applicable.): " + _gameExecutable);
-        std::cout << "Game executable not found (Did you write it correctly? Path and all too, if applicable.): " << _gameExecutable << std::endl;
-        return false;
-    }
+//std::string UCOnline::GetGameExecutable() const {
+//    return _gameExecutable;
+//}
 
-    try {
-        _logger->Log("Launching game: " + _gameExecutable + " " + _gameArguments);
-        std::cout << "Launching game: " << _gameExecutable << " " << _gameArguments << std::endl;
-
-        std::filesystem::path exePath(_gameExecutable);
-        std::string workingDir = exePath.parent_path().string();
-
-        STARTUPINFOA si = { sizeof(si) };
-        PROCESS_INFORMATION pi;
-
-        std::string commandLine = "\"" + _gameExecutable + "\" " + _gameArguments;
-
-        if (CreateProcessA(NULL, const_cast<char*>(commandLine.c_str()), NULL, NULL, FALSE, 0, NULL, workingDir.c_str(), &si, &pi)) {
-            _logger->Log("Game launched successfully! (PID: " + std::to_string(pi.dwProcessId) + ")");
-            std::cout << "Game launched successfully! The game's window should appear shortly. This window can be closed and / or may close on its own." << std::endl;
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
-            return true;
-        } else {
-            _logger->LogError("Failed to launch game process");
-            std::cout << "Failed to launch game process" << std::endl;
-            return false;
-        }
-    } catch (const std::exception& ex) {
-        _logger->LogException(ex, "Game launch failed");
-        _logger->Log("This can happen for many reasons, if you're certain it should work then just try whatever you can. Throw whatever you got at the wall and see what sticks.");
-        std::cout << "Error launching game: " << ex.what() << std::endl;
-        return false;
-    }
-}
-
-void UCOnline::SetGameExecutable(const std::string& gameExePath) {
-    _gameExecutable = gameExePath;
-    _config->SetGameExecutable(gameExePath);
-    _config->SaveConfig();
-}
-
-void UCOnline::SetGameArguments(const std::string& arguments) {
-    _gameArguments = arguments;
-    _config->SetGameArguments(arguments);
-    _config->SaveConfig();
-}
-
-std::string UCOnline::GetGameExecutable() const {
-    return _gameExecutable;
-}
-
-std::string UCOnline::GetGameArguments() const {
-    return _gameArguments;
-}
+//std::string UCOnline::GetGameArguments() const {
+//    return _gameArguments;
+//}
 
 void UCOnline::SaveConfig() {
     _config->SetAppID(_currentAppID);
-    _config->SetGameExecutable(_gameExecutable);
-    _config->SetGameArguments(_gameArguments);
+    //_config->SetGameExecutable(_gameExecutable);
+    //_config->SetGameArguments(_gameArguments);
     _config->SaveConfig();
 }
 
 void UCOnline::ReloadConfig() {
     _config->LoadConfig();
     _currentAppID = _config->GetAppID();
-    _gameExecutable = _config->GetGameExecutable();
-    _gameArguments = _config->GetGameArguments();
+    //_gameExecutable = _config->GetGameExecutable();
+    //_gameArguments = _config->GetGameArguments();
 }
 
 Logger* UCOnline::GetLogger() {

@@ -6,7 +6,31 @@
 #include <memory>
 #include <windows.h>
 
-class UCOnline {
+// DLL Export/Import macros
+#ifdef UC_ONLINE_EXPORTS
+#define UC_ONLINE_API __declspec(dllexport)
+#else
+#define UC_ONLINE_API __declspec(dllimport)
+#endif
+
+// C API for external use
+extern "C" {
+    UC_ONLINE_API void* UCOnline_Create(const char* iniFilePath);
+    UC_ONLINE_API void UCOnline_Destroy(void* instance);
+    UC_ONLINE_API bool UCOnline_Initialize(void* instance);
+    UC_ONLINE_API void UCOnline_Shutdown(void* instance);
+    UC_ONLINE_API void UCOnline_SetAppID(void* instance, uint32_t appID);
+    UC_ONLINE_API uint32_t UCOnline_GetAppID(void* instance);
+    UC_ONLINE_API bool UCOnline_IsSteamInitialized(void* instance);
+    UC_ONLINE_API bool UCOnline_LaunchGame(void* instance);
+    //UC_ONLINE_API void UCOnline_SetGameExecutable(void* instance, const char* exePath);
+    //UC_ONLINE_API void UCOnline_SetGameArguments(void* instance, const char* arguments);
+    //UC_ONLINE_API const char* UCOnline_GetGameExecutable(void* instance);
+    //UC_ONLINE_API const char* UCOnline_GetGameArguments(void* instance);
+    UC_ONLINE_API void UCOnline_RunCallbacks(void* instance);
+}
+
+class UC_ONLINE_API UCOnline {
 public:
     UCOnline(const std::string& iniFilePath = "config.ini");
     ~UCOnline();
@@ -20,10 +44,10 @@ public:
 
     void CreateAppIdFile();
     bool LaunchGame();
-    void SetGameExecutable(const std::string& gameExePath);
-    void SetGameArguments(const std::string& arguments);
-    std::string GetGameExecutable() const;
-    std::string GetGameArguments() const;
+    //void SetGameExecutable(const std::string& gameExePath);
+    //void SetGameArguments(const std::string& arguments);
+    //std::string GetGameExecutable() const;
+    //std::string GetGameArguments() const;
     void SaveConfig();
     void ReloadConfig();
 
@@ -40,8 +64,8 @@ private:
     uint32_t _currentAppID;
     std::unique_ptr<IniConfig> _config;
     std::unique_ptr<Logger> _logger;
-    std::string _gameExecutable;
-    std::string _gameArguments;
+    //std::string _gameExecutable;
+    //std::string _gameArguments;
     std::string _steamApiDllPath;
 
     bool TryMultipleInitializationMethods();

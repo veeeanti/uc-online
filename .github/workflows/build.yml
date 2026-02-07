@@ -1,4 +1,4 @@
-name: Build C++ Version
+name: Build DLLs
 
 on:
   push:
@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-x86:
+    name: Build 32-bit DLL
     runs-on: windows-latest
 
     steps:
@@ -17,32 +18,48 @@ jobs:
     - name: Install CMake
       run: |
         choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+    
     - name: Configure CMake for x86
       run: |
         mkdir build-x86
         cd build-x86
         cmake .. -G "Visual Studio 17 2022" -A Win32
+    
     - name: Build x86
       run: |
         cd build-x86
         cmake --build . --config Release
+    
+    - name: Upload x86 DLL
+      uses: actions/upload-artifact@v4
+      with:
+        name: uc-online-x86
+        path: build-x86/Release/uc-online.dll
+
+  build-x64:
+    name: Build 64-bit DLL
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install CMake
+      run: |
+        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+    
     - name: Configure CMake for x64
       run: |
         mkdir build-x64
         cd build-x64
         cmake .. -G "Visual Studio 17 2022" -A x64
+    
     - name: Build x64
       run: |
         cd build-x64
         cmake --build . --config Release
-    - name: Upload x86 artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: uc-online-x86
-        path: build-x86/Release/uc-online.exe
-
-    - name: Upload x64 artifacts
+    
+    - name: Upload x64 DLL
       uses: actions/upload-artifact@v4
       with:
         name: uc-online-x64
-        path: build-x64/Release/uc-online64.exe
+        path: build-x64/Release/uc-online64.dll

@@ -15,12 +15,18 @@ public:
     // Specific getters/setters
     uint32_t GetAppID();
     void SetAppID(uint32_t appId);
-    std::string GetGameExecutable();
-    void SetGameExecutable(const std::string& gameExePath);
-    std::string GetGameArguments();
-    void SetGameArguments(const std::string& arguments);
+    //std::string GetGameExecutable();
+    //void SetGameExecutable(const std::string& gameExePath);
+    //std::string GetGameArguments();
+    //void SetGameArguments(const std::string& arguments);
     std::string GetSteamApiDllPath();
     void SetSteamApiDllPath(const std::string& dllPath);
+    std::string GetSteamAppIdFile();
+    void SetSteamAppIdFile(const std::string& filePath);
+    bool GetEnableLogging();
+    void SetEnableLogging(bool enable);
+    std::string GetLogFile();
+    void SetLogFile(const std::string& logFile);
 
 private:
     std::string _iniFilePath;
