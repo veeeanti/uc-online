@@ -53,8 +53,8 @@ void IniConfig::LoadConfig() {
     
     std::unordered_map<std::string, std::string>& ucOnlineSection = _configData["uc-online"];
     if (ucOnlineSection.find("AppID") == ucOnlineSection.end()) ucOnlineSection["AppID"] = "480";
-    //if (ucOnlineSection.find("GameExecutable") == ucOnlineSection.end()) ucOnlineSection["GameExecutable"] = "";
-    //if (ucOnlineSection.find("GameArguments") == ucOnlineSection.end()) ucOnlineSection["GameArguments"] = "";
+    if (ucOnlineSection.find("GameExecutable") == ucOnlineSection.end()) ucOnlineSection["GameExecutable"] = "";
+    if (ucOnlineSection.find("GameArguments") == ucOnlineSection.end()) ucOnlineSection["GameArguments"] = "";
     if (ucOnlineSection.find("SteamAppIdFile") == ucOnlineSection.end()) ucOnlineSection["SteamAppIdFile"] = "steam_appid.txt";
     if (ucOnlineSection.find("SteamApiDLLPath") == ucOnlineSection.end()) ucOnlineSection["SteamApiDLLPath"] = "";
     
@@ -112,21 +112,21 @@ void IniConfig::SetAppID(uint32_t appId) {
     SetValue("uc-online", "AppID", std::to_string(appId));
 }
 
-//std::string IniConfig::GetGameExecutable() {
-//    return GetValue("uc-online", "GameExecutable", "");
-//}
-//
-//void IniConfig::SetGameExecutable(const std::string& gameExePath) {
-//    SetValue("uc-online", "GameExecutable", gameExePath);
-//}
+std::string IniConfig::GetGameExecutable() {
+    return GetValue("uc-online", "GameExecutable", "");
+}
 
-//std::string IniConfig::GetGameArguments() {
-//    return GetValue("uc-online", "GameArguments", "");
-//}
-//
-//void IniConfig::SetGameArguments(const std::string& arguments) {
-//    SetValue("uc-online", "GameArguments", arguments);
-//}
+void IniConfig::SetGameExecutable(const std::string& gameExePath) {
+    SetValue("uc-online", "GameExecutable", gameExePath);
+}
+
+std::string IniConfig::GetGameArguments() {
+    return GetValue("uc-online", "GameArguments", "");
+}
+
+void IniConfig::SetGameArguments(const std::string& arguments) {
+    SetValue("uc-online", "GameArguments", arguments);
+}
 
 std::string IniConfig::GetSteamApiDllPath() {
     return GetValue("uc-online", "SteamApiDLLPath", "");

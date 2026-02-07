@@ -8,8 +8,8 @@
 UCOnline64::UCOnline64(const std::string& iniFilePath) {
     _config = std::make_unique<IniConfig>(iniFilePath);
     _currentAppID = _config->GetAppID();
-   //_gameExecutable = _config->GetGameExecutable();
-   //_gameArguments = _config->GetGameArguments();
+    _gameExecutable = _config->GetGameExecutable();
+    _gameArguments = _config->GetGameArguments();
     _steamApiDllPath = _config->GetSteamApiDllPath();
 
     std::string logFile = _config->GetValue("Logging", "LogFile", "uc_online.log");
@@ -17,7 +17,7 @@ UCOnline64::UCOnline64(const std::string& iniFilePath) {
     _logger = std::make_unique<Logger>(logFile, enableLogging);
 
     _logger->Log("uc-online64 initialized with appid: " + std::to_string(_currentAppID));
-    //_logger->Log("Game executable: " + (_gameExecutable.empty() ? "not configured" : _gameExecutable));
+    _logger->Log("Game executable: " + (_gameExecutable.empty() ? "not configured" : _gameExecutable));
     _logger->Log("steam_api64.dll path: " + (_steamApiDllPath.empty() ? "default loading" : _steamApiDllPath));
 }
 

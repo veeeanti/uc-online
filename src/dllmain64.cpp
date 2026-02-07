@@ -88,35 +88,35 @@ extern "C" {
         return uc->LaunchGame();
     }
 
-    //__declspec(dllexport) void UCOnline64_SetGameExecutable(void* instance, const char* exePath) {
-    //    if (!instance || !exePath) return;
-    //    UCOnline64* uc = static_cast<UCOnline64*>(instance);
-    //    uc->SetGameExecutable(exePath);
-    //}
+    __declspec(dllexport) void UCOnline64_SetGameExecutable(void* instance, const char* exePath) {
+        if (!instance || !exePath) return;
+        UCOnline64* uc = static_cast<UCOnline64*>(instance);
+        uc->SetGameExecutable(exePath);
+    }
 
-    //__declspec(dllexport) void UCOnline64_SetGameArguments(void* instance, const char* arguments) {
-    //    if (!instance || !arguments) return;
-    //    UCOnline64* uc = static_cast<UCOnline64*>(instance);
-    //    uc->SetGameArguments(arguments);
-    //}
+   __declspec(dllexport) void UCOnline64_SetGameArguments(void* instance, const char* arguments) {
+        if (!instance || !arguments) return;
+        UCOnline64* uc = static_cast<UCOnline64*>(instance);
+        uc->SetGameArguments(arguments);
+    }
 
-    //__declspec(dllexport) const char* UCOnline64_GetGameExecutable(void* instance) {
-    //    if (!instance) return "";
-    //    UCOnline64* uc = static_cast<UCOnline64*>(instance);
-    //    
-    //    std::lock_guard<std::mutex> lock(g_stringMutex);
-    //    g_gameExeStrings[instance] = uc->GetGameExecutable();
-    //    return g_gameExeStrings[instance].c_str();
-    //}
+    __declspec(dllexport) const char* UCOnline64_GetGameExecutable(void* instance) {
+        if (!instance) return "";
+        UCOnline64* uc = static_cast<UCOnline64*>(instance);
+        
+        std::lock_guard<std::mutex> lock(g_stringMutex);
+        g_gameExeStrings[instance] = uc->GetGameExecutable();
+        return g_gameExeStrings[instance].c_str();
+    }
 
-    //__declspec(dllexport) const char* UCOnline64_GetGameArguments(void* instance) {
-    //    if (!instance) return "";
-    //    UCOnline64* uc = static_cast<UCOnline64*>(instance);
-    //    
-    //    std::lock_guard<std::mutex> lock(g_stringMutex);
-    //    g_gameArgStrings[instance] = uc->GetGameArguments();
-    //    return g_gameArgStrings[instance].c_str();
-    //}
+    __declspec(dllexport) const char* UCOnline64_GetGameArguments(void* instance) {
+        if (!instance) return "";
+        UCOnline64* uc = static_cast<UCOnline64*>(instance);
+        
+        std::lock_guard<std::mutex> lock(g_stringMutex);
+        g_gameArgStrings[instance] = uc->GetGameArguments();
+        return g_gameArgStrings[instance].c_str();
+    }
 
     __declspec(dllexport) void UCOnline64_RunCallbacks(void* instance) {
         if (!instance) return;

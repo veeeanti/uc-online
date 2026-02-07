@@ -8,8 +8,8 @@
 UCOnline::UCOnline(const std::string& iniFilePath) {
     _config = std::make_unique<IniConfig>(iniFilePath);
     _currentAppID = _config->GetAppID();
-    ////gameExecutable = _config->GetGameExecutable();
-    ////gameArguments = _config->GetGameArguments();
+    _gameExecutable = _config->GetGameExecutable();
+    _gameArguments = _config->GetGameArguments();
     _steamApiDllPath = _config->GetSteamApiDllPath();
 
     std::string logFile = _config->GetValue("Logging", "LogFile", "uc_online.log");
@@ -17,7 +17,7 @@ UCOnline::UCOnline(const std::string& iniFilePath) {
     _logger = std::make_unique<Logger>(logFile, enableLogging);
 
     _logger->Log("uc-online initialized with appid: " + std::to_string(_currentAppID));
-    //_logger->Log("Game executable: " + (_gameExecutable.empty() ? "not configured" : _gameExecutable));
+    _logger->Log("Game executable: " + (_gameExecutable.empty() ? "not configured" : _gameExecutable));
     _logger->Log("steam_api.dll path: " + (_steamApiDllPath.empty() ? "default loading" : _steamApiDllPath));
 }
 
@@ -267,38 +267,38 @@ bool UCOnline::InitializeSteamInterfaces() {
     }
 }
 
-//void UCOnline::SetGameExecutable(const std::string& gameExePath) {
-//    _gameExecutable = gameExePath;
-//    _config->SetGameExecutable(gameExePath);
-//    _config->SaveConfig();
-//}
+void UCOnline::SetGameExecutable(const std::string& gameExePath) {
+    _gameExecutable = gameExePath;
+    _config->SetGameExecutable(gameExePath);
+    _config->SaveConfig();
+}
 
-//void UCOnline::SetGameArguments(const std::string& arguments) {
-//    _gameArguments = arguments;
-//    _config->SetGameArguments(arguments);
-//    _config->SaveConfig();
-//}
+void UCOnline::SetGameArguments(const std::string& arguments) {
+    _gameArguments = arguments;
+    _config->SetGameArguments(arguments);
+    _config->SaveConfig();
+}
 
-//std::string UCOnline::GetGameExecutable() const {
-//    return _gameExecutable;
-//}
+std::string UCOnline::GetGameExecutable() const {
+    return _gameExecutable;
+}
 
-//std::string UCOnline::GetGameArguments() const {
-//    return _gameArguments;
-//}
+std::string UCOnline::GetGameArguments() const {
+    return _gameArguments;
+}
 
 void UCOnline::SaveConfig() {
     _config->SetAppID(_currentAppID);
-    //_config->SetGameExecutable(_gameExecutable);
-    //_config->SetGameArguments(_gameArguments);
+    _config->SetGameExecutable(_gameExecutable);
+    _config->SetGameArguments(_gameArguments);
     _config->SaveConfig();
 }
 
 void UCOnline::ReloadConfig() {
     _config->LoadConfig();
     _currentAppID = _config->GetAppID();
-    //_gameExecutable = _config->GetGameExecutable();
-    //_gameArguments = _config->GetGameArguments();
+    _gameExecutable = _config->GetGameExecutable();
+    _gameArguments = _config->GetGameArguments();
 }
 
 Logger* UCOnline::GetLogger() {
