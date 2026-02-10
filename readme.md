@@ -97,5 +97,6 @@ If you have any issues with running, building from source, or working with it in
 One idea I had is to try making this MacOS compatible, but I have no clue how to, I don't even have a Mac of any kind nor do I have anything compatible with being Hackintosh'ed, so I'll leave that for someone else more capable than myself to try to work on for another time. 
 
 ~veeλnti<3
-https://union-crax.xyz/ - come check us out and maybe even put in a request!
-https://vee-anti.xyz/ - my personal site (made by Lou) I use to learn typescript and nextjs for random and silly additions that I want to try adding in lol. learn a bit more about me too!
+
+- https://union-crax.xyz/ - come check us out and maybe even put in a request!
+- https://vee-anti.xyz/ - my personal site (made by Lou) I use to learn typescript and nextjs for random and silly additions that I want to try adding in lol. learn a bit more about me too!
