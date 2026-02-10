@@ -1,6 +1,8 @@
-# uc-online
+# uc-online (Old C# Source Code, deprecated - not recommended for use)
+
 
 ## The only two things I ask of anyone who wants to use this code is that you leave the name the same (unless I allow otherwise) and do not add malware. with that being said, go nuts. make this better than what I can make of it. 
+## - This doesn't apply anymore to this outdated code, it more so applies to the other more recently updated and better maintained branches / variants. If you are wanting to use this for any reason, it is yours my friend. I'm sticking to the C++ codebases and will never touch this one again.
 
 ## Building instructions:
 
@@ -9,6 +11,7 @@
 
 ### Actually building it:
  - Run the ``build.bat`` file after installing the .NET SDK.
+ - Or, if you prefer, run in a cmd window ``dotnet build --configuration Release``
 
 =======================================================
 
