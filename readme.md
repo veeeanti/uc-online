@@ -1,4 +1,4 @@
-# When forking this repo, PLEASE make sure to toggle off the "only fork main branch" option so you can work with all versions / branches and push your modifications to them as needed and build them too using GitHub actions. if you make a new branch, add in the name of the branch in the workflow files for main and new branch to have it build correctly. if you want to contribute, contact me on discord or create a pull request if you can and I'll look at it and we'll go from there. 
+## __When forking this repo, PLEASE make sure to toggle off the "only fork main branch" option so you can work with all versions / branches and push your modifications to them as needed and build them too using GitHub actions. if you make a new branch, add in the name of the branch in the workflow files for main and new branch to have it build correctly. if you want to contribute, contact me on discord or create a pull request if you can and I'll look at it and we'll go from there.__ 
 
 ====================
 
@@ -9,7 +9,7 @@ Requirements:
  - Visual Studio (latest, make sure C / C++ development tools is checked and installed on initial VS Installer window and tab)
  - MSVC v143 Build tools 
  - Windows 10 / 11 SDK
- - MSBuild
+ - MSBuild(?)
 
 Configuring and Building:
 Preferably in a CMD window in the root of the repo folder on Windows,
@@ -34,15 +34,19 @@ For Arch / Arch-based, Fedora, or any distro using RPM packages,
 For TempleOS,
  - how, or more importantly - WHY do you have this installed and what are you planning?
  - are you secretly Terry Davis, the greatest programmer ever to be chosen by God?
- - I don't believe this would be compatible with the HolyC language and wouldn't even begin to compile... much less even be useful to anyone if it did somehow compile and run successfully.
+ - I don't believe this would be compatible with the HolyC language and wouldn't even begin to compile... much less even be useful to anyone if it did somehow compile and run successfully. steam is not on this and probably will never be, sorry.
 
 I do recommend just letting the workflows take care of building it for you, it uploads each variant artifacts separately to download and only takes two to three minutes to complete for Windows and will build in under a minute for Linux (even though it takes significantly less storage to build for Linux lol).
 
 ====================
 
 ## How to use:
-Configs
-for release downloads without steam_api(64).dll found next to uc-online(64).exe (distinguished by the "nosteamworks" in the zip name):
+
+### Heads up!!
+ - When running the uc-online(64).exe with __no config.ini__ next to it, one will be generated. Unfortunately, the only thing it creates is the appid line. I tried fixing this multiple times so it even generates the commented lines to help understand how this needs to be set up to correctly work with examples written too. Please help with this, anyone that can figure it out. 
+
+Configs,
+- for release downloads without steam_api(64).dll found next to uc-online(64).exe (distinguished by the "nosteamworks" in the zip name):
  - Extract files from either x32 or x64 folders into main game folder, depending on the architecture of the game itself (look for the steam_api.dll - if it has 64 in the name, it's 64bit, if not then it's 32)
  - Open config.ini, you MUST set it up like this or similarly according to your game.
    - ``AppId = 480`` - iirc the way I wrote it forces you to use only this appid and if you try anything else it gets angy lol. If you try that, make sure the steam_appid.txt reflects it and matches your changes here.
@@ -79,8 +83,19 @@ On Windows, you will always get a scary red window warning you about it, this is
 
 Thank you all to everyone who's tried this out for themselves and gave their feedback on it and praised it and voiced their opinions on it as well on the cs.rin thread and tried helping out with ideas to make it better and better. Thank you to all of the friends I have and have made, mostly since trying to publicize this more by posting about it, out there that give me motivation to work on this and other similar projects of mine as well, and to just keep going on through life. I know this will be one day beyond my expectations and hopes and be way better than I initially thought when starting it. 
 
+- Thank you to [Ahmedvflame](https://GitHub.com/ahmedvflamez) for helping me get this even working in the first place on Linux and testing it out for me whenever I would think I'd finally gotten it working, and eventually modifying the base Linux branch code very heavily to get it working completely using the steamclient.so found in the steam installation folder and finding the best method for using this while avoiding the libsteam_api.so entirely. 
+- Thank you to [Lou](https://GitHub.com/Union-Crax) for letting me make this for us and use with our listings. And thank you for fixing the path issues when you were testing it with UnionCrax.Direct and figuring it out in the first place. Working with you and everyone else on the UC Team has been amazing, we've come so far with the site since I joined early sometime last year, thank you for giving me the opportunity to work with y'all and letting me make these sorts of projects for us to use and put out there to help our name become known even more online.
+- Thank you to [Ace! _SL/S](https://GitHub.com/AceSLS) for trying to help me test it out and also helping me finally realize the reason why testing with Ahmed on GMod would not work when he connected to me, my firewall was causing issues. Also thank you for giving me motivation to make this work completely across the board on Linux as best as I can and to find the way to do it too. I'm glad this caught your interest and tickled your fancy and had you reach out. I really enjoy your presence and chatting with you, and I look forward to working on the projects we have in mind together and just becoming better friends. ^^ 
+- Also, thank you to [Deadboys Corner](https://GitHub.com/deadboy666) for trying to help me out with the original C# code and trying to compile for Linux at that point in the projects life, and helping me understand more about .NET built projects and that even when compiled for Linux, they still use .dll files and sometimes even .exes even though they'll run as Linux binaries and work completely fine. And also for trying to give me a new idea for this by making it so it is used as a single .dll to rename to an import called on by the game to be loaded in proton to then be injected into the process and work as intended and expected without using the separate launcher at all. It requires much, much more work and does not work as it is in its current state. 
+- Lastly, thank you EMPTERROR, for agreeing and pushing for me to make this open source. If you hadn't, this wouldn't be here and I would have likely never decided to improve it to be better and more appealing to whoever finds it and decides to try it. The switch to C++ from C# was the best decision I made and it's because of you telling me I should do this, you a real one G. 
+
+To explain the name...
 The name uc-online comes from having poor naming abilities (I can't come up with good names for anything) and also the group / site I work with, "UnionCrax". Its name being literally "unioncrax-online" lmao. This is because before I made it open source, it was going to likely be our own "online fix alternative", especially for games that they haven't worked with yet or at all.
 
 If you have any issues with running, building from source, or working with it in any way, open an issue in the tab up top. Wanna talk in the discussions? Maybe share your ideas for this project, I'm open to new ideas and I'll get around to trying to make it a reality to the best of my abilities and making sure to credit whoever wrote about it properly.
 
 One idea I had is to try making this MacOS compatible, but I have no clue how to, I don't even have a Mac of any kind nor do I have anything compatible with being Hackintosh'ed, so I'll leave that for someone else more capable than myself to try to work on for another time. 
+
+~veeλnti<3
+https://union-crax.xyz/ - come check us out and maybe even put in a request!
+https://vee-anti.xyz/ - my personal site (made by Lou) I use to learn typescript and nextjs for random and silly additions that I want to try adding in lol. learn a bit more about me too!
