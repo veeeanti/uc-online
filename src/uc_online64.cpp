@@ -253,38 +253,38 @@ bool UCOnline64::InitializeSteamInterfaces() {
 }
 
 
-//void UCOnline64::SetGameExecutable(const std::string& gameExePath) {
-//    _gameExecutable = gameExePath;
-//    _config->SetGameExecutable(gameExePath);
-//    _config->SaveConfig();
-//}
+void UCOnline64::SetGameExecutable(const std::string& gameExePath) {
+    _gameExecutable = gameExePath;
+    _config->SetGameExecutable(gameExePath);
+    _config->SaveConfig();
+}
 
-//void UCOnline64::SetGameArguments(const std::string& arguments) {
-//    _gameArguments = arguments;
-//    _config->SetGameArguments(arguments);
-//    _config->SaveConfig();
-//}
+void UCOnline64::SetGameArguments(const std::string& arguments) {
+    _gameArguments = arguments;
+    _config->SetGameArguments(arguments);
+    _config->SaveConfig();
+}
 
-//std::string UCOnline64::GetGameExecutable() const {
-//    return _gameExecutable;
-//}
+std::string UCOnline64::GetGameExecutable() const {
+    return _gameExecutable;
+}
 
-//std::string UCOnline64::GetGameArguments() const {
-//    return _gameArguments;
-//}
+std::string UCOnline64::GetGameArguments() const {
+    return _gameArguments;
+}
 
 void UCOnline64::SaveConfig() {
     _config->SetAppID(_currentAppID);
-    //_config->SetGameExecutable(_gameExecutable);
-    //_config->SetGameArguments(_gameArguments);
+    _config->SetGameExecutable(_gameExecutable);
+    _config->SetGameArguments(_gameArguments);
     _config->SaveConfig();
 }
 
 void UCOnline64::ReloadConfig() {
     _config->LoadConfig();
     _currentAppID = _config->GetAppID();
-    //_gameExecutable = _config->GetGameExecutable();
-    //_gameArguments = _config->GetGameArguments();
+    _gameExecutable = _config->GetGameExecutable();
+    _gameArguments = _config->GetGameArguments();
 }
 
 Logger* UCOnline64::GetLogger() {

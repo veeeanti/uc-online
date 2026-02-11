@@ -75,3 +75,7 @@ desktop.ini
 
 # Logs
 *.log
+/uc-online.dir
+/uc-online64.dir/Release
+/x64/Release/ALL_BUILD
+/x64

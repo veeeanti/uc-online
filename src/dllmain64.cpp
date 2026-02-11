@@ -9,11 +9,85 @@ static std::mutex g_stringMutex;
 static std::unordered_map<void*, std::string> g_gameExeStrings;
 static std::unordered_map<void*, std::string> g_gameArgStrings;
 
+// Global UCOnline64 instance for auto-initialization when used as dinput8.dll proxy
+static UCOnline64* g_ucOnlineInstance = nullptr;
+static bool g_autoInitialized = false;
+
+// Forward declarations for dinput8.dll proxy
+extern "C" {
+    typedef HRESULT (WINAPI *DirectInput8Create_t)(HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPVOID* ppvOut, LPUNKNOWN punkOuter);
+    DirectInput8Create_t OriginalDirectInput8Create = nullptr;
+}
+
+// Load the original dinput8.dll and get the DirectInput8Create function
+bool InitializeDInput8Proxy() {
+    char systemPath[MAX_PATH];
+    if (GetSystemDirectoryA(systemPath, MAX_PATH) == 0) {
+        return false;
+    }
+    
+    std::string dinput8Path = std::string(systemPath) + "\\dinput8.dll";
+    HMODULE hOriginal = LoadLibraryA(dinput8Path.c_str());
+    if (!hOriginal) {
+        return false;
+    }
+    
+    OriginalDirectInput8Create = (DirectInput8Create_t)GetProcAddress(hOriginal, "DirectInput8Create");
+    return OriginalDirectInput8Create != nullptr;
+}
+
+// Proxy function that forwards to the original dinput8.dll
+extern "C" __declspec(dllexport) HRESULT WINAPI DirectInput8Create(
+    HINSTANCE hinst,
+    DWORD dwVersion,
+    REFIID riidltf,
+    LPVOID* ppvOut,
+    LPUNKNOWN punkOuter
+) {
+    if (!OriginalDirectInput8Create) {
+        return E_FAIL;
+    }
+    return OriginalDirectInput8Create(hinst, dwVersion, riidltf, ppvOut, punkOuter);
+}
+
+// Auto-initialize UCOnline64 when loaded as a proxy DLL
+void AutoInitializeUCOnline() {
+    if (g_autoInitialized || g_ucOnlineInstance) {
+        return;
+    }
+    
+    // Create and initialize UCOnline64 instance
+    g_ucOnlineInstance = new UCOnline64("config.ini");
+    if (g_ucOnlineInstance) {
+        if (g_ucOnlineInstance->InitializeUCOnline()) {
+            g_autoInitialized = true;
+            // Launch the game if configured
+            g_ucOnlineInstance->LaunchGame();
+        } else {
+            delete g_ucOnlineInstance;
+            g_ucOnlineInstance = nullptr;
+        }
+    }
+}
+
+// Cleanup auto-initialized instance
+void AutoShutdownUCOnline() {
+    if (g_ucOnlineInstance) {
+        g_ucOnlineInstance->ShutdownUCOnline();
+        delete g_ucOnlineInstance;
+        g_ucOnlineInstance = nullptr;
+        g_autoInitialized = false;
+    }
+}
+
 // DLL Entry Point
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
-        // Initialize when DLL is loaded
+        // Initialize the dinput8 proxy
+        InitializeDInput8Proxy();
+        // Auto-initialize UCOnline64 when loaded as a proxy (e.g., via dlloverride)
+        AutoInitializeUCOnline();
         break;
     case DLL_THREAD_ATTACH:
         break;
@@ -21,6 +95,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         break;
     case DLL_PROCESS_DETACH:
         // Cleanup when DLL is unloaded
+        AutoShutdownUCOnline();
         std::lock_guard<std::mutex> lock(g_stringMutex);
         g_gameExeStrings.clear();
         g_gameArgStrings.clear();

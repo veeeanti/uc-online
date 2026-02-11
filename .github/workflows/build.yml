@@ -18,22 +18,28 @@ jobs:
     - name: Install CMake
       run: |
         choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-    
+
     - name: Configure CMake for x86
       run: |
         mkdir build-x86
         cd build-x86
         cmake .. -G "Visual Studio 17 2022" -A Win32
-    
+
     - name: Build x86
       run: |
         cd build-x86
         cmake --build . --config Release
-    
+
     - name: Upload x86 DLL
       uses: actions/upload-artifact@v4
       with:
         name: uc-online-x86
+        path: build-x86/Release/uc-online.dll
+
+    - name: Upload x86 dinput8 proxy
+      uses: actions/upload-artifact@v4
+      with:
+        name: dinput8-x86
         path: build-x86/Release/uc-online.dll
 
   build-x64:
@@ -46,20 +52,63 @@ jobs:
     - name: Install CMake
       run: |
         choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
-    
+
     - name: Configure CMake for x64
       run: |
         mkdir build-x64
         cd build-x64
         cmake .. -G "Visual Studio 17 2022" -A x64
-    
+
     - name: Build x64
       run: |
         cd build-x64
         cmake --build . --config Release
-    
+
     - name: Upload x64 DLL
       uses: actions/upload-artifact@v4
       with:
         name: uc-online-x64
         path: build-x64/Release/uc-online64.dll
+
+    - name: Upload x64 dinput8 proxy
+      uses: actions/upload-artifact@v4
+      with:
+        name: dinput8-x64
+        path: build-x64/Release/uc-online64.dll
+
+  release:
+    name: Create Release Package
+    needs: [build-x86, build-x64]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+
+    steps:
+    - name: Download x86 artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: uc-online-x86
+        path: ./release/x86
+
+    - name: Download x64 artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: uc-online-x64
+        path: ./release/x64
+
+    - name: Rename for dinput8 proxy
+      run: |
+        mkdir -p ./release/dinput8-x86
+        mkdir -p ./release/dinput8-x64
+        cp ./release/x86/uc-online.dll ./release/dinput8-x86/dinput8.dll
+        cp ./release/x64/uc-online64.dll ./release/dinput8-x64/dinput8.dll
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./release/x86/uc-online.dll
+          ./release/x64/uc-online64.dll
+          ./release/dinput8-x86/dinput8.dll
+          ./release/dinput8-x64/dinput8.dll
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
