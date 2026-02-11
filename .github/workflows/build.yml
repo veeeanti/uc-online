@@ -36,10 +36,10 @@ jobs:
         name: uc-online-x86
         path: build-x86/Release/uc-online.dll
 
-    - name: Upload x86 dinput8 proxy
+    - name: Upload x86 winmm proxy
       uses: actions/upload-artifact@v4
       with:
-        name: dinput8-x86
+        name: winmm-x86
         path: build-x86/Release/uc-online.dll
 
   build-x64:
@@ -70,10 +70,10 @@ jobs:
         name: uc-online-x64
         path: build-x64/Release/uc-online64.dll
 
-    - name: Upload x64 dinput8 proxy
+    - name: Upload x64 winmm proxy
       uses: actions/upload-artifact@v4
       with:
-        name: dinput8-x64
+        name: winmm-x64
         path: build-x64/Release/uc-online64.dll
 
   release:
@@ -95,12 +95,12 @@ jobs:
         name: uc-online-x64
         path: ./release/x64
 
-    - name: Rename for dinput8 proxy
+    - name: Rename for winmm proxy
       run: |
-        mkdir -p ./release/dinput8-x86
-        mkdir -p ./release/dinput8-x64
-        cp ./release/x86/uc-online.dll ./release/dinput8-x86/dinput8.dll
-        cp ./release/x64/uc-online64.dll ./release/dinput8-x64/dinput8.dll
+        mkdir -p ./release/winmm-x86
+        mkdir -p ./release/winmm-x64
+        cp ./release/x86/uc-online.dll ./release/winmm-x86/winmm.dll
+        cp ./release/x64/uc-online64.dll ./release/winmm-x64/winmm.dll
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -108,7 +108,7 @@ jobs:
         files: |
           ./release/x86/uc-online.dll
           ./release/x64/uc-online64.dll
-          ./release/dinput8-x86/dinput8.dll
-          ./release/dinput8-x64/dinput8.dll
+          ./release/winmm-x86/winmm.dll
+          ./release/winmm-x64/winmm.dll
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

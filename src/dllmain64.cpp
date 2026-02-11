@@ -14,51 +14,69 @@ static UCOnline64* g_ucOnlineInstance = nullptr;
 static bool g_autoInitialized = false;
 static bool g_deferInitialization = true; // Defer Steam init until first DirectInput call
 
-// Forward declarations for dinput8.dll proxy
+// Forward declarations for winmm.dll proxy
 extern "C" {
-    typedef HRESULT (WINAPI *DirectInput8Create_t)(HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPVOID* ppvOut, LPUNKNOWN punkOuter);
-    DirectInput8Create_t OriginalDirectInput8Create = nullptr;
+    typedef BOOL (WINAPI *PlaySoundA_t)(LPCSTR pszSound, HMODULE hmod, DWORD fdwSound);
+    typedef BOOL (WINAPI *PlaySoundW_t)(LPCWSTR pszSound, HMODULE hmod, DWORD fdwSound);
+    PlaySoundA_t OriginalPlaySoundA = nullptr;
+    PlaySoundW_t OriginalPlaySoundW = nullptr;
 }
 
 // Forward declarations for auto-initialization functions
 void AutoInitializeUCOnline();
 void AutoShutdownUCOnline();
 
-// Load the original dinput8.dll and get the DirectInput8Create function
-bool InitializeDInput8Proxy() {
+// Load the original winmm.dll and get the PlaySound functions
+bool InitializeWinmmProxy() {
     char systemPath[MAX_PATH];
     if (GetSystemDirectoryA(systemPath, MAX_PATH) == 0) {
         return false;
     }
-    
-    std::string dinput8Path = std::string(systemPath) + "\\dinput8.dll";
-    HMODULE hOriginal = LoadLibraryA(dinput8Path.c_str());
+
+    std::string winmmPath = std::string(systemPath) + "\\winmm.dll";
+    HMODULE hOriginal = LoadLibraryA(winmmPath.c_str());
     if (!hOriginal) {
         return false;
     }
-    
-    OriginalDirectInput8Create = (DirectInput8Create_t)GetProcAddress(hOriginal, "DirectInput8Create");
-    return OriginalDirectInput8Create != nullptr;
+
+    OriginalPlaySoundA = (PlaySoundA_t)GetProcAddress(hOriginal, "PlaySoundA");
+    OriginalPlaySoundW = (PlaySoundW_t)GetProcAddress(hOriginal, "PlaySoundW");
+    return OriginalPlaySoundA != nullptr && OriginalPlaySoundW != nullptr;
 }
 
-// Proxy function that forwards to the original dinput8.dll
-extern "C" __declspec(dllexport) HRESULT WINAPI DirectInput8Create(
-    HINSTANCE hinst,
-    DWORD dwVersion,
-    REFIID riidltf,
-    LPVOID* ppvOut,
-    LPUNKNOWN punkOuter
+// Proxy functions that forward to the original winmm.dll
+extern "C" __declspec(dllexport) BOOL WINAPI PlaySoundA(
+    LPCSTR pszSound,
+    HMODULE hmod,
+    DWORD fdwSound
 ) {
-    // Initialize Steam lazily on first DirectInput call to avoid DllMain restrictions
+    // Initialize Steam lazily on first PlaySound call to avoid DllMain restrictions
     if (g_deferInitialization) {
         g_deferInitialization = false;
         AutoInitializeUCOnline();
     }
 
-    if (!OriginalDirectInput8Create) {
-        return E_FAIL;
+    if (!OriginalPlaySoundA) {
+        return FALSE;
     }
-    return OriginalDirectInput8Create(hinst, dwVersion, riidltf, ppvOut, punkOuter);
+    return OriginalPlaySoundA(pszSound, hmod, fdwSound);
+}
+
+extern "C" __declspec(dllexport) BOOL WINAPI PlaySoundW(
+    LPCWSTR pszSound,
+    HMODULE hmod,
+    DWORD fdwSound
+) {
+    // Initialize Steam lazily on first PlaySound call to avoid DllMain restrictions
+    if (g_deferInitialization) {
+        g_deferInitialization = false;
+        AutoInitializeUCOnline();
+    }
+
+    if (!OriginalPlaySoundW) {
+        return FALSE;
+    }
+    return OriginalPlaySoundW(pszSound, hmod, fdwSound);
 }
 
 // Auto-initialize UCOnline64 when loaded as a proxy DLL
@@ -95,8 +113,8 @@ void AutoShutdownUCOnline() {
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
-        // Initialize the dinput8 proxy (just load the original DLL)
-        InitializeDInput8Proxy();
+        // Initialize the winmm proxy (just load the original DLL)
+        InitializeWinmmProxy();
         // Note: Steam initialization is deferred to avoid crashes in DllMain
         break;
     case DLL_THREAD_ATTACH:

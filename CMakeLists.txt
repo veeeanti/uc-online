@@ -12,7 +12,7 @@ add_library(uc-online SHARED src/dllmain.cpp src/uc_online.cpp src/ini_config.cp
 
 # For Windows, link kernel32 for LoadLibrary, etc.
 if(WIN32)
-    target_link_libraries(uc-online PRIVATE kernel32 dinput8)
+    target_link_libraries(uc-online PRIVATE kernel32 winmm)
     target_compile_definitions(uc-online PRIVATE IS_32BIT UC_ONLINE_EXPORTS)
     # Force 32-bit compilation
     if(MSVC)
@@ -26,7 +26,7 @@ endif()
 # 64-bit DLL version
 add_library(uc-online64 SHARED src/dllmain64.cpp src/uc_online64.cpp src/ini_config.cpp src/logger.cpp src/resources.rc)
 if(WIN32)
-    target_link_libraries(uc-online64 PRIVATE kernel32 dinput8)
+    target_link_libraries(uc-online64 PRIVATE kernel32 winmm)
     target_compile_definitions(uc-online64 PRIVATE IS_64BIT UC_ONLINE_EXPORTS)
     # Force 64-bit compilation
     if(MSVC)
