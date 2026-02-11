@@ -61,8 +61,8 @@ void AutoInitializeUCOnline() {
     if (g_ucOnlineInstance) {
         if (g_ucOnlineInstance->InitializeUCOnline()) {
             g_autoInitialized = true;
-            // Launch the game if configured
-            g_ucOnlineInstance->LaunchGame();
+            // Note: We don't call LaunchGame() here because the game is already
+            // being launched by the process that's loading this DLL as dinput8.dll
         } else {
             delete g_ucOnlineInstance;
             g_ucOnlineInstance = nullptr;
