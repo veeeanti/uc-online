@@ -12,12 +12,17 @@ static std::unordered_map<void*, std::string> g_gameArgStrings;
 // Global UCOnline instance for auto-initialization when used as dinput8.dll proxy
 static UCOnline* g_ucOnlineInstance = nullptr;
 static bool g_autoInitialized = false;
+static bool g_deferInitialization = true; // Defer Steam init until first DirectInput call
 
 // Forward declarations for dinput8.dll proxy
 extern "C" {
     typedef HRESULT (WINAPI *DirectInput8Create_t)(HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPVOID* ppvOut, LPUNKNOWN punkOuter);
     DirectInput8Create_t OriginalDirectInput8Create = nullptr;
 }
+
+// Forward declarations for auto-initialization functions
+void AutoInitializeUCOnline();
+void AutoShutdownUCOnline();
 
 // Load the original dinput8.dll and get the DirectInput8Create function
 bool InitializeDInput8Proxy() {
@@ -44,6 +49,12 @@ extern "C" __declspec(dllexport) HRESULT WINAPI DirectInput8Create(
     LPVOID* ppvOut,
     LPUNKNOWN punkOuter
 ) {
+    // Initialize Steam lazily on first DirectInput call to avoid DllMain restrictions
+    if (g_deferInitialization) {
+        g_deferInitialization = false;
+        AutoInitializeUCOnline();
+    }
+
     if (!OriginalDirectInput8Create) {
         return E_FAIL;
     }
@@ -84,10 +95,9 @@ void AutoShutdownUCOnline() {
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
-        // Initialize the dinput8 proxy
+        // Initialize the dinput8 proxy (just load the original DLL)
         InitializeDInput8Proxy();
-        // Auto-initialize UCOnline when loaded as a proxy (e.g., via dlloverride)
-        AutoInitializeUCOnline();
+        // Note: Steam initialization is deferred to avoid crashes in DllMain
         break;
     case DLL_THREAD_ATTACH:
         break;
