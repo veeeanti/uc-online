@@ -76,7 +76,8 @@ On Windows, you will always get a scary red window warning you about it, this is
  - linux-noconsole - Same thing but no console window.
  - linux-nosteamworks-steamclient - Credit goes to [Ahmedvflame](https://github.com/ahmedvflamez) for this, as he made it load from the default steamclient.so for x86 and x64 games from the main Steam installation dir found in "Ubuntu12_32" and the folder for x64 (i cannot recall it, i'm assuming "Ubuntu12_64"?). All I did to finish it was to make it just one runnable launcher for both architectures and being able to detect between the two. I decided on that since Linux Steam uses the same names for both variants, it's super easy to get them confused lol. But that made it easier to write out how to get it to tell between the two.
  - dll - I'm attempting to try and have it as just a dll to inject into the game instead of running a separate launcher to make it easier for running through Proton on Linux for [Deadboys Corner](https://GitHub.com/deadboy666) as a test currently. Still needs immense work to be done in order to get this functional at the very least.
-
+ - dllwinmm - Another version of the dll branch that instead uses winmm.dll to inject and run the uc-online code all from using the game's original launcher. This version runs exceedingly well, though needs some polishing here and there desperately. Just download the built uc-online(64).dll or download the dllwinmm.zip from releases and drag and drop into a game folder with the launcher that has an import for winmm.dll, set up config snd run game. Everything should run fine on paper, Gmod worked fine. Same with Rivals of Aether.
+ 
 ====================
 
 ## Thanks and other notes:
