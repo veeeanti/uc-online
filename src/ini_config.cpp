@@ -150,6 +150,7 @@ LogFile = uc_online.log
 std::ofstream file(_iniFilePath);
 if (file.is_open()) {
     file << defaultConfig;
+    file.flush();
     LoadConfig();
 } else {
     std::cerr << "Error creating default config: " << _iniFilePath << std::endl;
