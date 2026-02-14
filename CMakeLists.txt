@@ -14,10 +14,9 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 
 # Include directories
 include_directories(include)
-include_directories(sdk/public)
 
 # Function to create a build target for a specific architecture
-function(add_linux_target target_name arch_dir steam_lib)
+function(add_linux_target target_name)
     add_executable(${target_name}
         src/main.cpp
         src/uc_online.cpp
@@ -26,7 +25,7 @@ function(add_linux_target target_name arch_dir steam_lib)
     )
     
     # Set architecture-specific compile and link flags
-    if(${arch_dir} STREQUAL "linux32")
+    if(${target_name} STREQUAL "uc-online")
         set_target_properties(${target_name} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
         add_compile_definitions(${target_name} PRIVATE IS_32BIT)
     else()
@@ -38,7 +37,6 @@ function(add_linux_target target_name arch_dir steam_lib)
         PRIVATE
         dl
         pthread
-        ${CMAKE_SOURCE_DIR}/sdk/redistributable_bin/${arch_dir}/${steam_lib}
     )
     
     # Set compile definitions for Linux
@@ -49,10 +47,10 @@ function(add_linux_target target_name arch_dir steam_lib)
 endfunction()
 
 # 32-bit version
-add_linux_target(uc-online linux32 libsteam_api.so)
+add_linux_target(uc-online)
 
 # 64-bit version
-add_linux_target(uc-online64 linux64 libsteam_api.so)
+add_linux_target(uc-online64)
 
 # Copy config.ini if it exists
 if(EXISTS ${CMAKE_SOURCE_DIR}/config.ini)

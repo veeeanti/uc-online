@@ -12,14 +12,6 @@
 #include <spawn.h>
 #include <sys/wait.h>
 
-// Steam includes
-#include <steam/steam_api.h>
-#include <steam/isteamgameserver.h>
-#include <steam/isteamugc.h>
-#include <steam/isteamhttp.h>
-#include <steam/isteamnetworking.h>
-#include <steam/isteamclient.h>
-
 class UCOnline {
 public:
     UCOnline(const std::string& iniFilePath = "config.ini");
@@ -27,7 +19,6 @@ public:
 
     bool InitializeUCOnline();
     void ShutdownUCOnline();
-    void RunSteamCallbacks();
     void SetCustomAppID(uint32_t appID);
     uint32_t GetCurrentAppID() const;
     bool IsSteamInitialized() const;
@@ -46,15 +37,6 @@ public:
     bool IsLoggingEnabled() const;
     void ClearLog();
 
-    // Steam interface accessors
-    ISteamApps* GetSteamApps() const { return _steamApps; }
-    ISteamUser* GetSteamUser() const { return _steamUser; }
-    ISteamGameServer* GetSteamGameServer() const { return _steamGameServer; }
-    ISteamUGC* GetSteamUGC() const { return _steamUGC; }
-    ISteamHTTP* GetSteamHTTP() const { return _steamHTTP; }
-    ISteamNetworking* GetSteamNetworking() const { return _steamNetworking; }
-    ISteamClient* GetSteamClient() const { return _steamClient; }
-
 private:
     bool _steamInitialized = false;
     uint32_t _currentAppID;
@@ -62,21 +44,4 @@ private:
     std::unique_ptr<Logger> _logger;
     std::string _gameExecutable;
     std::string _gameArguments;
-
-    bool InitializeSteamAPI();
-    bool InitializeSteamInterfaces();
-    bool InitializeSteamGameServer();
-    bool InitializeSteamUGC();
-    bool InitializeSteamHTTP();
-    bool InitializeSteamNetworking();
-    bool InitializeSteamClient();
-
-    // Steam interfaces
-    ISteamApps* _steamApps = nullptr;
-    ISteamUser* _steamUser = nullptr;
-    ISteamGameServer* _steamGameServer = nullptr;
-    ISteamUGC* _steamUGC = nullptr;
-    ISteamHTTP* _steamHTTP = nullptr;
-    ISteamNetworking* _steamNetworking = nullptr;
-    ISteamClient* _steamClient = nullptr;
 };
