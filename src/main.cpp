@@ -45,9 +45,6 @@ int main() {
         std::cout << "Game should now launch and work fine through Steam. You can close this window now or after the game's window opens, or even after you close the game." << std::endl;
 
         for (int i = 0; i < 5; i++) {
-            if (uc_online.IsSteamInitialized()) {
-                uc_online.RunSteamCallbacks();
-            }
             std::this_thread::sleep_for(std::chrono::seconds(1));
             std::cout << "Trying to run the game... This usually means it won't run even after successfully initializing Steam using a spoofed appid. Double check your config, especially the gameexecutable line." << std::endl;
             std::cout << "(" << (i + 1) << "/5 seconds until this window automatically closes unless game launch succeeds.)" << std::endl;
