@@ -1,4 +1,4 @@
-# __Attention:__ uc-online2 is now available, [you can find it here on the new repo](https://github.com/veeeanti/uc-online2) - it is still in its early stages however, expect issues and instability!
+# __Attention:__ uc-online2 is now available, [you can find it here on the new repo](https://github.com/unioncrax-team/uc-online2) - it is still in its early stages however, expect issues and instability!
 
 ====================
 
